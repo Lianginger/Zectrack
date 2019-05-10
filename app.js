@@ -1,12 +1,13 @@
 const request = require('request')
 const cheerio = require('cheerio')
-const baseUrl = 'https://www.zeczec.com/projects/yexinumbrella'
+const baseUrl = 'https://www.zeczec.com/projects/'
+const projectURI = 'yexinumbrella'
 const moment = require('moment')
 const tz = require('moment-timezone')
 const mongoose = require('mongoose')
 const Project = require('./models/project')
 const Reward = require('./models/reward')
-const intervalTime = 1000 * 60 * 10
+const intervalTime = 1000 * 60 * 5
 
 mongoose.connect('mongodb://localhost/zectrack', { useNewUrlParser: true })
 const db = mongoose.connection
@@ -16,17 +17,18 @@ db.once('open', function () {
 })
 mongoose.set('debug', true)
 
-Project.findOne({ date: moment().tz('Asia/Taipei').format('YYYY-MM-DD') })
-  .then(project => {
-    if (project) {
-      console.log(`找到專案紀錄並更新數據`)
-      updateProject(project)
-      // Object.assign(project)
-      // project.save()
-    } else {
-      storeNewProject()
-    }
-  })
+function crawlProjectStart() {
+  Project.findOne({ date: moment().tz('Asia/Taipei').format('YYYY-MM-DD') })
+    .then(project => {
+      if (project) {
+        console.log(`更新數據`)
+        updateProject(project)
+      } else {
+        console.log(`新建專案，建立數據`)
+        storeNewProject()
+      }
+    })
+}
 
 async function updateProject(project) {
   const projectInfo = await projectInfoCrawlData
@@ -65,7 +67,7 @@ async function storeNewProject() {
 }
 
 const projectInfoCrawlData = new Promise((resolve, reject) => {
-  request(baseUrl, (err, res, body) => {
+  request(baseUrl + projectURI, (err, res, body) => {
     if (err) { return reject(err) }
     const $ = cheerio.load(body)
 
@@ -85,7 +87,7 @@ const projectInfoCrawlData = new Promise((resolve, reject) => {
 })
 
 const projectRewardsCrawlData = new Promise((resolve, reject) => {
-  request(baseUrl, (err, res, body) => {
+  request(baseUrl + projectURI, (err, res, body) => {
     if (err) { return reject(err) }
     const $ = cheerio.load(body)
 
@@ -102,4 +104,5 @@ const projectRewardsCrawlData = new Promise((resolve, reject) => {
   })
 })
 
-// setInterval(getProjectData, intervalTime)
+crawlProjectStart()
+setInterval(crawlProjectStart, intervalTime)
