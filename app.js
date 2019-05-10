@@ -12,9 +12,7 @@ db.once('open', function () {
 })
 mongoose.set('debug', true)
 
-app.get('/', (req, res) => {
-  res.send('Zectrack is running...')
-})
+app.use('/', require('./routes/home'))
 
 runZectrack()
 
