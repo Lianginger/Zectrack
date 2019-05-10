@@ -16,8 +16,57 @@ db.once('open', function () {
 })
 mongoose.set('debug', true)
 
-function getProjectData() {
+Project.findOne({ date: moment().tz('Asia/Taipei').format('YYYY-MM-DD') })
+  .then(project => {
+    if (project) {
+      console.log(`找到專案紀錄並更新數據`)
+      updateProject(project)
+      // Object.assign(project)
+      // project.save()
+    } else {
+      storeNewProject()
+    }
+  })
+
+async function updateProject(project) {
+  const projectInfo = await projectInfoCrawlData
+  const rewards = await projectRewardsCrawlData
+  Object.assign(project, projectInfo)
+  project.save()
+    .then(
+      rewards.map(rewardFromCrawl => {
+        Reward.findOne({
+          date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
+          name: rewardFromCrawl.name,
+        }).then(rewardFromDB => {
+          if (rewardFromDB) {
+            Object.assign(rewardFromDB, rewardFromCrawl)
+            rewardFromDB.save()
+          } else {
+            const newReward = new Reward(rewardFromCrawl)
+            newReward.save()
+          }
+        })
+      })
+    )
+}
+
+async function storeNewProject() {
+  const projectInfo = await projectInfoCrawlData
+  const rewards = await projectRewardsCrawlData
+  const newProject = new Project(projectInfo)
+  newProject.save()
+    .then(project => {
+      rewards.map(reward => {
+        reward.project_id = project._id
+      })
+      Reward.insertMany(rewards)
+    })
+}
+
+const projectInfoCrawlData = new Promise((resolve, reject) => {
   request(baseUrl, (err, res, body) => {
+    if (err) { return reject(err) }
     const $ = cheerio.load(body)
 
     const projectInfo = {
@@ -31,7 +80,14 @@ function getProjectData() {
       end: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(23, 39),
       date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
     }
-    console.log(projectInfo)
+    return resolve(projectInfo)
+  })
+})
+
+const projectRewardsCrawlData = new Promise((resolve, reject) => {
+  request(baseUrl, (err, res, body) => {
+    if (err) { return reject(err) }
+    const $ = cheerio.load(body)
 
     let rewards = []
     $('body > div.container.mv4 > div > div.w-30-l.ph3-l.ph0.flex-ns.flex-wrap.flex-column-l.w-100 > div').each(function (i, elem) {
@@ -42,26 +98,8 @@ function getProjectData() {
       reward.date = moment().tz('Asia/Taipei').format('YYYY-MM-DD')
       rewards[i] = reward
     })
-    console.log(rewards)
-
-    Project.find({ date: moment().tz('Asia/Taipei').format('YYYY-MM-DD') })
-      .then(project => {
-        if (project) {
-          console.log(`找到專案紀錄並更新數據`)
-          // Object.assign(project)
-          // project.save()
-        } else {
-          // 新建一筆專案紀錄
-          const oneProjectRecord = new Project(projectInfo)
-          oneProjectRecord.save()
-            .then(project => {
-              Reward.insertMany(rewards)
-              // 想辦法把 project._id 放進 reward
-            })
-        }
-      })
+    return resolve(rewards)
   })
-}
+})
 
-getProjectData()
-setInterval(getProjectData, intervalTime)
+// setInterval(getProjectData, intervalTime)
