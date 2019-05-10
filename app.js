@@ -31,8 +31,8 @@ function crawlProjectStart() {
 }
 
 async function updateProject(project) {
-  const projectInfo = await projectInfoCrawlData
-  const rewards = await projectRewardsCrawlData
+  const projectInfo = await crawlProjectInfoData()
+  const rewards = await crawlProjectRewardsData()
   Object.assign(project, projectInfo)
   project.save()
     .then(
@@ -54,8 +54,8 @@ async function updateProject(project) {
 }
 
 async function storeNewProject() {
-  const projectInfo = await projectInfoCrawlData
-  const rewards = await projectRewardsCrawlData
+  const projectInfo = await crawlProjectInfoData()
+  const rewards = await crawlProjectRewardsData()
   const newProject = new Project(projectInfo)
   newProject.save()
     .then(project => {
@@ -66,43 +66,49 @@ async function storeNewProject() {
     })
 }
 
-const projectInfoCrawlData = new Promise((resolve, reject) => {
-  request(baseUrl + projectURI, (err, res, body) => {
-    if (err) { return reject(err) }
-    const $ = cheerio.load(body)
+function crawlProjectInfoData() {
+  return new Promise((resolve, reject) => {
+    request(baseUrl + projectURI, (err, res, body) => {
+      if (err) { return reject(err) }
+      const $ = cheerio.load(body)
 
-    const projectInfo = {
-      type: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.dark-gray.b.dib').text(),
-      category: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.gray.b.dib').text(),
-      name: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2) > h2').text(),
-      raise: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f3.b.js-sum-raised').text().replace(/[^0-9]/g, "")),
-      goal: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f7.mt2').text().replace(/[^0-9]/g, "")),
-      backers: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div:nth-child(9) > span.js-backers-count').text()),
-      start: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(4, 20),
-      end: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(23, 39),
-      date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
-    }
-    return resolve(projectInfo)
-  })
-})
-
-const projectRewardsCrawlData = new Promise((resolve, reject) => {
-  request(baseUrl + projectURI, (err, res, body) => {
-    if (err) { return reject(err) }
-    const $ = cheerio.load(body)
-
-    let rewards = []
-    $('body > div.container.mv4 > div > div.w-30-l.ph3-l.ph0.flex-ns.flex-wrap.flex-column-l.w-100 > div').each(function (i, elem) {
-      let reward = {}
-      reward.name = $(this).find('div.black.f6.mv-child-0.maxh5.maxh-none-ns.overflow-auto > p:nth-child(1)').text().split('\n')[0]
-      reward.backers = parseInt($(this).find('div.f7.mv2 > span > span').text())
-      reward.price = parseInt($(this).find('.black.b.f4').text().replace(/[^0-9]/g, ""))
-      reward.date = moment().tz('Asia/Taipei').format('YYYY-MM-DD')
-      rewards[i] = reward
+      const projectInfo = {
+        type: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.dark-gray.b.dib').text(),
+        category: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.gray.b.dib').text(),
+        name: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2) > h2').text(),
+        raise: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f3.b.js-sum-raised').text().replace(/[^0-9]/g, "")),
+        goal: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f7.mt2').text().replace(/[^0-9]/g, "")),
+        backers: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div:nth-child(9) > span.js-backers-count').text()),
+        start: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(4, 20),
+        end: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(23, 39),
+        date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
+      }
+      return resolve(projectInfo)
     })
-    return resolve(rewards)
   })
-})
+}
+const projectInfoCrawlData = ''
+
+function crawlProjectRewardsData() {
+  return new Promise((resolve, reject) => {
+    request(baseUrl + projectURI, (err, res, body) => {
+      if (err) { return reject(err) }
+      const $ = cheerio.load(body)
+
+      let rewards = []
+      $('body > div.container.mv4 > div > div.w-30-l.ph3-l.ph0.flex-ns.flex-wrap.flex-column-l.w-100 > div').each(function (i, elem) {
+        let reward = {}
+        reward.name = $(this).find('div.black.f6.mv-child-0.maxh5.maxh-none-ns.overflow-auto > p:nth-child(1)').text().split('\n')[0]
+        reward.backers = parseInt($(this).find('div.f7.mv2 > span > span').text())
+        reward.price = parseInt($(this).find('.black.b.f4').text().replace(/[^0-9]/g, ""))
+        reward.date = moment().tz('Asia/Taipei').format('YYYY-MM-DD')
+        rewards[i] = reward
+      })
+      return resolve(rewards)
+    })
+  })
+}
+const projectRewardsCrawlData = ''
 
 crawlProjectStart()
 setInterval(crawlProjectStart, intervalTime)
