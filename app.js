@@ -9,7 +9,7 @@ const Project = require('./models/project')
 const Reward = require('./models/reward')
 const intervalTime = 1000 * 60 * 5
 
-mongoose.connect('mongodb://localhost/zectrack', { useNewUrlParser: true })
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/zectrack', { useNewUrlParser: true })
 const db = mongoose.connection
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function () {
