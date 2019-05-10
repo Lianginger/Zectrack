@@ -1,1 +1,1 @@
-web: node app.js & node zectrack.js & wait -n
+web: node app.js

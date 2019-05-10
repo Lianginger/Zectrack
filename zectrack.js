@@ -8,8 +8,10 @@ const Project = require('./models/project')
 const Reward = require('./models/reward')
 const intervalTime = 1000 * 60 * 5
 
-crawlProjectStart()
-setInterval(crawlProjectStart, intervalTime)
+function runZectrack() {
+  crawlProjectStart()
+  setInterval(crawlProjectStart, intervalTime)
+}
 
 function crawlProjectStart() {
   Project.findOne({ date: moment().tz('Asia/Taipei').format('YYYY-MM-DD') })
@@ -101,3 +103,5 @@ function crawlProjectRewardsData() {
     })
   })
 }
+
+module.exports = runZectrack
