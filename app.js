@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const http = require('http')
 const port = process.env.PORT || 3000
 const mongoose = require('mongoose')
 const runZectrack = require('./zectrack')
@@ -13,6 +14,11 @@ db.once('open', function () {
 mongoose.set('debug', true)
 
 app.use('/', require('./routes/home'))
+
+// Set to keep Heroku app awake
+setInterval(function () {
+  http.get("http://zectrack.herokuapp.com/")
+}, 1000 * 60 * 25)
 
 runZectrack()
 
