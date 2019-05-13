@@ -4,7 +4,7 @@ const Project = require('../models/project')
 const Reward = require('../models/reward')
 
 router.get('/', (req, res) => {
-  res.send('Zectrack is running...')
+  res.render('index')
 })
 
 module.exports = router

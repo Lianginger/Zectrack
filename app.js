@@ -2,9 +2,11 @@ const express = require('express')
 const app = express()
 const http = require('http')
 const port = process.env.PORT || 3000
+const exphbs = require('express-handlebars')
 const mongoose = require('mongoose')
 const runZectrack = require('./zectrack')
 
+// 設定連線到 mongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/zectrack', { useNewUrlParser: true })
 const db = mongoose.connection
 db.on('error', console.error.bind(console, 'connection error:'))
@@ -12,6 +14,10 @@ db.once('open', function () {
   console.log('MongoDB is connected!')
 })
 mongoose.set('debug', true)
+
+// 設定模板引擎
+app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
+app.set('view engine', 'handlebars')
 
 app.use('/', require('./routes/home'))
 
