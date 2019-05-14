@@ -6,7 +6,7 @@ var rewardSchema = new Schema({
   backers: Number,
   price: Number,
   date: String,
-  project_id: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+  uri: String,
 })
 
 module.exports = mongoose.model('Reward', rewardSchema)

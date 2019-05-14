@@ -1,7 +1,7 @@
 const request = require('request')
 const cheerio = require('cheerio')
 const baseUrl = 'https://www.zeczec.com/projects/'
-const projectURI = 'yexinumbrella'
+const projectURIArray = ['yexinumbrella', 'lessdosoap']
 const moment = require('moment')
 const tz = require('moment-timezone')
 const Project = require('./models/project')
@@ -9,26 +9,31 @@ const Reward = require('./models/reward')
 const intervalTime = 1000 * 60 * 5
 
 function runZectrack() {
-  crawlProjectStart()
-  setInterval(crawlProjectStart, intervalTime)
+  crawlProjectStart(projectURIArray)
+  setInterval(crawlProjectStart, intervalTime, projectURIArray)
 }
 
-function crawlProjectStart() {
-  Project.findOne({ date: moment().tz('Asia/Taipei').format('YYYY-MM-DD') })
-    .then(project => {
-      if (project) {
-        console.log(`更新數據`)
-        updateProject(project)
-      } else {
-        console.log(`新建專案，建立數據`)
-        storeNewProject()
-      }
+function crawlProjectStart(projectURIArray) {
+  projectURIArray.map(projectURI => {
+    Project.findOne({
+      date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
+      uri: projectURI,
     })
+      .then(project => {
+        if (project) {
+          console.log(`更新數據`)
+          updateProject(project, projectURI)
+        } else {
+          console.log(`新建專案，建立數據`)
+          storeNewProject(projectURI)
+        }
+      })
+  })
 }
 
-async function updateProject(project) {
-  const projectInfo = await crawlProjectInfoData()
-  const rewards = await crawlProjectRewardsData()
+async function updateProject(project, projectURI) {
+  const projectInfo = await crawlProjectInfoData(projectURI)
+  const rewards = await crawlProjectRewardsData(projectURI)
   Object.assign(project, projectInfo)
   project.save()
     .then(
@@ -36,6 +41,7 @@ async function updateProject(project) {
         Reward.findOne({
           date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
           name: rewardFromCrawl.name,
+          uri: projectURI
         }).then(rewardFromDB => {
           if (rewardFromDB) {
             Object.assign(rewardFromDB, rewardFromCrawl)
@@ -49,20 +55,20 @@ async function updateProject(project) {
     )
 }
 
-async function storeNewProject() {
-  const projectInfo = await crawlProjectInfoData()
-  const rewards = await crawlProjectRewardsData()
+async function storeNewProject(projectURI) {
+  const projectInfo = await crawlProjectInfoData(projectURI)
+  const rewards = await crawlProjectRewardsData(projectURI)
   const newProject = new Project(projectInfo)
   newProject.save()
     .then(project => {
       rewards.map(reward => {
-        reward.project_id = project._id
+        reward.uri = projectURI
       })
       Reward.insertMany(rewards)
     })
 }
 
-function crawlProjectInfoData() {
+function crawlProjectInfoData(projectURI) {
   return new Promise((resolve, reject) => {
     request(baseUrl + projectURI, (err, res, body) => {
       if (err) { return reject(err) }
@@ -74,17 +80,18 @@ function crawlProjectInfoData() {
         name: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2) > h2').text(),
         raise: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f3.b.js-sum-raised').text().replace(/[^0-9]/g, "")),
         goal: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f7.mt2').text().replace(/[^0-9]/g, "")),
-        backers: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div:nth-child(9) > span.js-backers-count').text()),
+        backers: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-backers-count').text()),
         start: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(4, 20),
         end: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(23, 39),
         date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
+        uri: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)').attr('href').substring(10)
       }
       return resolve(projectInfo)
     })
   })
 }
 
-function crawlProjectRewardsData() {
+function crawlProjectRewardsData(projectURI) {
   return new Promise((resolve, reject) => {
     request(baseUrl + projectURI, (err, res, body) => {
       if (err) { return reject(err) }
@@ -94,9 +101,10 @@ function crawlProjectRewardsData() {
       $('body > div.container.mv4 > div > div.w-30-l.ph3-l.ph0.flex-ns.flex-wrap.flex-column-l.w-100 > div').each(function (i, elem) {
         let reward = {}
         reward.name = $(this).find('div.black.f6.mv-child-0.maxh5.maxh-none-ns.overflow-auto > p:nth-child(1)').text().split('\n')[0]
-        reward.backers = parseInt($(this).find('div.f7.mv2 > span > span').text())
+        reward.backers = parseInt($(this).find('div.f7.mv2 > span > span').text()) || 0
         reward.price = parseInt($(this).find('.black.b.f4').text().replace(/[^0-9]/g, ""))
         reward.date = moment().tz('Asia/Taipei').format('YYYY-MM-DD')
+        reward.uri = projectURI
         rewards[i] = reward
       })
       return resolve(rewards)
