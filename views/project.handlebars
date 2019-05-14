@@ -1,0 +1,40 @@
+<h1>{{{projectInfo.name}}}</h1>
+<div id="project-raise-chart"></div>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script>
+  Highcharts.chart('project-raise-chart', {
+      chart: {
+        type: 'line'
+      },
+      title: {
+        text: '集資累積金額'
+      },
+      subtitle: {
+        text: '{{{projectInfo.start}}} - {{{projectInfo.end}}}'
+      },
+      xAxis: {
+        categories: {{{dateAxisDataString}}}
+      },
+      yAxis: {
+        title: {
+          text: '集資金額'
+        }
+      },
+      plotOptions: {
+        line: {
+          dataLabels: {
+            enabled: true
+          },
+          enableMouseTracking: false
+        }
+      },
+      series: [{
+        name: '',
+        data: {{{raiseAxisDataString}}}
+      }]
+    })
+</script>

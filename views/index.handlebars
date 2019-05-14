@@ -1,40 +1,9 @@
-<h1>{{{projectInfo.name}}}</h1>
-<div id="project-raise-chart"></div>
-
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/series-label.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/modules/export-data.js"></script>
-<script>
-  Highcharts.chart('project-raise-chart', {
-      chart: {
-        type: 'line'
-      },
-      title: {
-        text: '集資累積金額'
-      },
-      subtitle: {
-        text: '{{{projectInfo.start}}} - {{{projectInfo.end}}}'
-      },
-      xAxis: {
-        categories: {{{dateAxisDataString}}}
-      },
-      yAxis: {
-        title: {
-          text: '集資金額'
-        }
-      },
-      plotOptions: {
-        line: {
-          dataLabels: {
-            enabled: true
-          },
-          enableMouseTracking: false
-        }
-      },
-      series: [{
-        name: '',
-        data: {{{raiseAxisDataString}}}
-      }]
-    })
-</script>
+<div class="container">
+  <h1 class="text-center">Track your favorite project</h1>
+</div>
+<div class="container">
+  <ul>
+    <li><a href="/project/yexinumbrella">反向傘縮小再進化：迎戰雨季、征服艷陽，優雅俐落每一天！</a></li>
+    <li><a href="/project/lessdosoap">LESSDO 世界第一台家用自皂機，自己的肥皂自己做！</a></li>
+  </ul>
+</div>

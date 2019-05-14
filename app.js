@@ -20,6 +20,7 @@ app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
 
 app.use('/', require('./routes/home'))
+app.use('/project', require('./routes/project'))
 
 // Set to keep Heroku app awake
 setInterval(function () {
