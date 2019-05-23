@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000
 const exphbs = require('express-handlebars')
 const mongoose = require('mongoose')
 const runZectrack = require('./zectrack')
+const runRanktrack = require('./ranktrack')
 
 // 設定連線到 mongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/zectrack', { useNewUrlParser: true })
@@ -27,7 +28,8 @@ setInterval(function () {
   http.get("http://zectrack.herokuapp.com/")
 }, 1000 * 60 * 25)
 
-runZectrack()
+// runZectrack()
+runRanktrack()
 
 app.listen(port, () => {
   console.log(`Express is running and listen on port ${port}`)
