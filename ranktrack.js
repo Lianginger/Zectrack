@@ -1,6 +1,7 @@
 const request = require('request')
 const cheerio = require('cheerio')
-const baseUrl = 'https://www.zeczec.com/categories?type=presale&page='
+const projectTypes = ['presale', 'crowdfunding']
+const baseUrl = 'https://www.zeczec.com/categories?'
 const moment = require('moment')
 const tz = require('moment-timezone')
 const HourRankRecord = require('./models/hour-rank-record')
@@ -8,15 +9,17 @@ const HourRankProject = require('./models/hour-rank-project')
 const intervalTime = 1000 * 60 * 5
 
 function runRanktrack() {
-  rankTrack()
-  setInterval(rankTrack, intervalTime)
+  projectTypes.map(projectType => {
+    rankTrack(projectType)
+    setInterval(rankTrack, intervalTime, projectType)
+  })
 }
 
-async function rankTrack() {
-  const numberOfPageToCrawl = await getNumberOfPage()
+async function rankTrack(projectType) {
+  const numberOfPageToCrawl = await getNumberOfPage(projectType)
   let crawlPage = 1
   while (crawlPage <= numberOfPageToCrawl) {
-    const records = await crawlRecord(crawlPage)
+    const records = await crawlRecord(crawlPage, projectType)
     await HourRankRecord.insertMany(records)
 
     const uriArray = records.map(record => record.uri)
@@ -70,11 +73,11 @@ async function rankProject(uri) {
   }
 }
 
-async function getNumberOfPage() {
+async function getNumberOfPage(projectType) {
   let page = 1
 
   while (true) {
-    if (await isLastPage(page)) {
+    if (await isLastPage(page, projectType)) {
       break
     }
     page++
@@ -82,9 +85,9 @@ async function getNumberOfPage() {
   return page
 }
 
-function isLastPage(page) {
+function isLastPage(page, projectType) {
   return new Promise((resolve, reject) => [
-    request(baseUrl + page, (err, res, body) => {
+    request(`${baseUrl}page=${page}&type=${projectType}`, (err, res, body) => {
       if (err) { return reject(err) }
       const $ = cheerio.load(body)
       console.log(`檢查第${page}頁`)
@@ -99,9 +102,9 @@ function isLastPage(page) {
   ])
 }
 
-function crawlRecord(page) {
+function crawlRecord(page, projectType) {
   return new Promise((resolve, reject) => {
-    request(baseUrl + page, (err, res, body) => {
+    request(`${baseUrl}page=${page}&type=${projectType}`, (err, res, body) => {
       if (err) { return reject(err) }
       const $ = cheerio.load(body)
 
@@ -111,8 +114,9 @@ function crawlRecord(page) {
         if (leftString.indexOf('剩下') < 0) {
           return
         }
+
         const record = {
-          type: '預購式專案',
+          type: setChineseTypeNameByProjectType(projectType),
           name: $(this).find('div > a > h3').text(),
           raise: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > div.fr.b').text().replace(/[^0-9]/g, "")),
           left: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text().replace(/[^0-9]/g, "")),
@@ -125,6 +129,14 @@ function crawlRecord(page) {
       return resolve(records)
     })
   })
+}
+
+function setChineseTypeNameByProjectType(projectType) {
+  if (projectType === 'presale') {
+    return '預購式專案'
+  } else if (projectType === 'crowdfunding') {
+    return '群眾集資'
+  }
 }
 
 module.exports = runRanktrack
