@@ -1,30 +1,40 @@
 const request = require('request')
 const cheerio = require('cheerio')
-const baseUrl = 'https://www.zeczec.com/'
+const baseUrl = 'https://www.zeczec.com/categories?type=presale&page='
 const moment = require('moment')
 const tz = require('moment-timezone')
 const HourRankRecord = require('./models/hour-rank-record')
 const HourRankProject = require('./models/hour-rank-project')
 const intervalTime = 1000 * 60 * 5
 
-async function rankTrack() {
-  const records = await crawlRecord()
-  await HourRankRecord.insertMany(records)
-
-  const uriArray = records.map(record => record.uri)
-  checkRecords(uriArray)
+function runRanktrack() {
+  rankTrack()
+  setInterval(rankTrack, intervalTime)
 }
 
-function checkRecords(uriArray) {
+async function rankTrack() {
+  const numberOfPageToCrawl = await getNumberOfPage()
+  let crawlPage = 1
+  while (crawlPage <= numberOfPageToCrawl) {
+    const records = await crawlRecord(crawlPage)
+    await HourRankRecord.insertMany(records)
+
+    const uriArray = records.map(record => record.uri)
+    checkAndRankRecords(uriArray)
+    crawlPage++
+  }
+}
+
+function checkAndRankRecords(uriArray) {
   uriArray.map(uri => {
-    checkAndDeleteOldRecord(uri)
+    checkAndRankEachProject(uri)
   })
 }
 
-async function checkAndDeleteOldRecord(uri) {
+async function checkAndRankEachProject(uri) {
   const records = await HourRankRecord.find({ uri }).sort({ date: 1 }).exec()
-  console.log(records)
-  console.log(records.length)
+  // console.log(records)
+  // console.log(records.length)
   while (records.length > 13) {
     console.log('Delete old record')
     const oldRecord = records.shift()
@@ -60,25 +70,61 @@ async function rankProject(uri) {
   }
 }
 
-function crawlRecord() {
+async function getNumberOfPage() {
+  let page = 1
+
+  while (true) {
+    if (await isLastPage(page)) {
+      break
+    }
+    page++
+  }
+  return page
+}
+
+function isLastPage(page) {
+  return new Promise((resolve, reject) => [
+    request(baseUrl + page, (err, res, body) => {
+      if (err) { return reject(err) }
+      const $ = cheerio.load(body)
+      console.log(`檢查第${page}頁`)
+      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function (i, elem) {
+        const leftString = $(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text()
+        if (leftString.indexOf('剩下') < 0) {
+          resolve(true)
+        }
+        resolve(false)
+      })
+    })
+  ])
+}
+
+function crawlRecord(page) {
   return new Promise((resolve, reject) => {
-    request(baseUrl, (err, res, body) => {
+    request(baseUrl + page, (err, res, body) => {
       if (err) { return reject(err) }
       const $ = cheerio.load(body)
 
       const records = []
-      const record = {
-        type: '預購式專案',
-        name: $('body > div:nth-child(7) > div > div.flex.gutter3-l > div:nth-child(1) > div > a > h3').text(),
-        raise: parseInt($('body > div:nth-child(7) > div > div.flex.gutter3-l > div:nth-child(1) > div > div > div.fr.b').text().replace(/[^0-9]/g, "")),
-        left: parseInt($('body > div:nth-child(7) > div > div.flex.gutter3-l > div:nth-child(1) > div > div > span').text().replace(/[^0-9]/g, "")),
-        date: moment().tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
-        uri: $('body > div:nth-child(7) > div > div.flex.gutter3-l > div:nth-child(1) > div > a').attr('href').substring(10)
-      }
-      records.push(record)
+      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function (i, elem) {
+        const leftString = $(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text()
+        if (leftString.indexOf('剩下') < 0) {
+          return
+        }
+        const record = {
+          type: '預購式專案',
+          name: $(this).find('div > a > h3').text(),
+          raise: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > div.fr.b').text().replace(/[^0-9]/g, "")),
+          left: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text().replace(/[^0-9]/g, "")),
+          date: moment().tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
+          uri: $(this).find('div > a').attr('href').substring(10)
+        }
+        records.push(record)
+      })
+
       return resolve(records)
     })
   })
 }
 
-module.exports = rankTrack
+module.exports = runRanktrack
