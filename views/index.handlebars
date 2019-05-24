@@ -7,3 +7,17 @@
     <li><a href="/project/lessdosoap">LESSDO 世界第一台家用自皂機，自己的肥皂自己做！</a></li>
   </ul>
 </div>
+<h1 class="text-center">預購專案，過去一小時金額排行榜</h1>
+<div class="container">
+  <div class="list-group">
+    {{#each hourRankProjects}}
+    <a href="https://www.zeczec.com/projects/{{this.uri}}" class="list-group-item list-group-item-action">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{this.name}}</h5>
+        <small>專案倒數 {{this.left}} 天</small>
+      </div>
+      <p class="mb-1">NT$ {{this.hourRaise}}</p>
+    </a>
+    {{/each}}
+  </div>
+</div>
