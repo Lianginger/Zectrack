@@ -44,7 +44,7 @@ async function deleteProjectOffline(projectType, uriObjectInArray) {
     project.remove()
   })
   offLineRankRecord.map(record => {
-    project.remove()
+    record.remove()
   })
 }
 
