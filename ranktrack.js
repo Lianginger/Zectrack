@@ -30,12 +30,14 @@ async function rankTrack(projectType) {
     checkAndRankRecords(uriArray)
     crawlPage++
   }
-  await deleteProjectOffline(uriObjectInArray)
+  await deleteProjectOffline(projectType, uriObjectInArray)
 }
 
-async function deleteProjectOffline(uriObjectInArray) {
-  let offLineProject = await HourRankProject.find().nor(uriObjectInArray)
-  console.log(offLineProject)
+async function deleteProjectOffline(projectType, uriObjectInArray) {
+  let offLineRankProject = await HourRankProject.find({ type: projectType }).nor(uriObjectInArray)
+  let offLineRankRecord = await HourRankRecord.find({ type: projectType }).nor(uriObjectInArray)
+  console.log(offLineRankProject)
+  console.log(offLineRankRecord)
 }
 
 function checkAndRankRecords(uriArray) {
