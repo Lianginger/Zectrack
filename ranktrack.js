@@ -52,8 +52,10 @@ async function rankProject(uri) {
   const records = await HourRankRecord.find({ uri }).sort({ date: 1 }).exec()
   console.log(project)
   if (project) {
-    console.log('project exit, update data')
+    console.log('project exist, update data')
     project.type = records[records.length - 1].type
+    project.category = records[records.length - 1].category
+    project.image = records[records.length - 1].image
     project.name = records[records.length - 1].name
     project.hourRaise = records[records.length - 1].raise - records[0].raise
     project.left = records[records.length - 1].left
@@ -61,9 +63,11 @@ async function rankProject(uri) {
     project.uri = records[records.length - 1].uri
     await project.save()
   } else {
-    console.log('project not exit, create one')
+    console.log('project not exist, create one')
     await HourRankProject.create({
       type: records[records.length - 1].type,
+      category: records[records.length - 1].category,
+      image: records[records.length - 1].image,
       name: records[records.length - 1].name,
       hourRaise: records[records.length - 1].raise - records[0].raise,
       left: records[records.length - 1].left,
@@ -117,6 +121,8 @@ function crawlRecord(page, projectType) {
 
         const record = {
           type: setChineseTypeNameByProjectType(projectType),
+          category: $(this).find('div > span').text().substring(0, $(this).find('div > span').text().indexOf('By') - 1).replace('\n', ""),
+          image: $(this).find('div > a > div').attr('data-bg-src'),
           name: $(this).find('div > a > h3').text(),
           raise: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > div.fr.b').text().replace(/[^0-9]/g, "")),
           left: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text().replace(/[^0-9]/g, "")),

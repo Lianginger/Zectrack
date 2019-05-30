@@ -10,10 +10,21 @@ router.get('/', async (req, res) => {
     .sort({ hourRaise: -1 })
     .limit(10)
     .exec()
-  hourRankProjects.map(project => {
-    project.hourRaise = numeral(project.hourRaise).format('0,0')
+  const firstThreeProjects = []
+  const restProjects = []
+
+  hourRankProjects.map((project, index) => {
+    project.hourRaiseString = numeral(project.hourRaise).format('0,0')
+    if (index <= 2) {
+      project.rank = index + 1
+      firstThreeProjects.push(project)
+    } else {
+      project.rank = index + 1
+      restProjects.push(project)
+    }
   })
-  res.render('index', { hourRankProjects })
+
+  res.render('index', { firstThreeProjects, restProjects })
 })
 
 module.exports = router

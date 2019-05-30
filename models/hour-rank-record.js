@@ -3,6 +3,8 @@ var Schema = mongoose.Schema
 
 var hourRankRecordSchema = new Schema({
   type: String,
+  category: String,
+  image: String,
   name: String,
   raise: Number,
   left: Number,
