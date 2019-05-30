@@ -8,7 +8,7 @@ var hourRankRecordSchema = new Schema({
   name: String,
   raise: Number,
   left: Number,
-  leftUnit: Number,
+  leftUnit: String,
   date: String,
   uri: String
 })
