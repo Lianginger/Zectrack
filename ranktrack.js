@@ -18,14 +18,24 @@ function runRanktrack() {
 async function rankTrack(projectType) {
   const numberOfPageToCrawl = await getNumberOfPage(projectType)
   let crawlPage = 1
+  let uriObjectInArray = []
   while (crawlPage <= numberOfPageToCrawl) {
     const records = await crawlRecord(crawlPage, projectType)
     await HourRankRecord.insertMany(records)
 
     const uriArray = records.map(record => record.uri)
+    uriArray.map(thisUri => {
+      uriObjectInArray.push({ uri: thisUri })
+    })
     checkAndRankRecords(uriArray)
     crawlPage++
   }
+  await deleteProjectOffline(uriObjectInArray)
+}
+
+async function deleteProjectOffline(uriObjectInArray) {
+  let offLineProject = await HourRankProject.find().nor(uriObjectInArray)
+  console.log(offLineProject)
 }
 
 function checkAndRankRecords(uriArray) {
