@@ -10,6 +10,7 @@ var hourRankProjectSchema = new Schema({
   hourRaiseString: String,
   rank: String,
   left: Number,
+  leftUnit: Number,
   date: String,
   uri: String
 })

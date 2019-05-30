@@ -40,8 +40,12 @@ async function deleteProjectOffline(projectType, uriObjectInArray) {
   let offLineRankRecord = await HourRankRecord.find({
     type: setChineseTypeNameByProjectType(projectType)
   }).nor(uriObjectInArray)
-  console.log(offLineRankProject)
-  console.log(offLineRankRecord)
+  offLineRankProject.map(project => {
+    project.remove()
+  })
+  offLineRankRecord.map(record => {
+    project.remove()
+  })
 }
 
 function checkAndRankRecords(uriArray) {
@@ -75,6 +79,7 @@ async function rankProject(uri) {
     project.name = records[records.length - 1].name
     project.hourRaise = records[records.length - 1].raise - records[0].raise
     project.left = records[records.length - 1].left
+    project.leftUnit = records[records.length - 1].leftUnit
     project.date = records[records.length - 1].date
     project.uri = records[records.length - 1].uri
     await project.save()
@@ -87,6 +92,7 @@ async function rankProject(uri) {
       name: records[records.length - 1].name,
       hourRaise: records[records.length - 1].raise - records[0].raise,
       left: records[records.length - 1].left,
+      leftUnit: records[records.length - 1].leftUnit,
       date: records[records.length - 1].date,
       uri: records[records.length - 1].uri
     })
@@ -142,6 +148,7 @@ function crawlRecord(page, projectType) {
           name: $(this).find('div > a > h3').text(),
           raise: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > div.fr.b').text().replace(/[^0-9]/g, "")),
           left: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text().replace(/[^0-9]/g, "")),
+          leftUnit: $(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text().replace('\n', "").substr(-2, 2).replace(' ', ""),
           date: moment().tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
           uri: $(this).find('div > a').attr('href').substring(10)
         }

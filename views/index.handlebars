@@ -23,7 +23,7 @@
           <h5 class="card-title">{{this.name}}</h5>
         </a>
 
-        <p class="card-text">{{this.type}}｜{{this.category}}｜專案倒數 {{this.left}} 天</p>
+        <p class="card-text">{{this.type}}｜{{this.category}}｜專案倒數 {{this.left}} {{this.leftUnit}}</p>
         <h3>NT$ {{this.hourRaiseString}}</h3>
         <p class="card-text"><small class="text-muted">數據更新時間 {{this.date}}</small></p>
       </div>
@@ -44,7 +44,7 @@
       </div>
       <div class="row">
         <div class="col-6">
-          <p class="mb-1">{{this.type}}｜{{this.category}}｜專案倒數 {{this.left}} 天</p>
+          <p class="mb-1">{{this.type}}｜{{this.category}}｜專案倒數 {{this.left}} {{this.leftUnit}}</p>
         </div>
         <div class="col-6 text-right">
           <small>數據更新時間 {{this.date}}</small>
