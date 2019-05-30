@@ -34,8 +34,12 @@ async function rankTrack(projectType) {
 }
 
 async function deleteProjectOffline(projectType, uriObjectInArray) {
-  let offLineRankProject = await HourRankProject.find({ type: projectType }).nor(uriObjectInArray)
-  let offLineRankRecord = await HourRankRecord.find({ type: projectType }).nor(uriObjectInArray)
+  let offLineRankProject = await HourRankProject.find({
+    type: setChineseTypeNameByProjectType(projectType)
+  }).nor(uriObjectInArray)
+  let offLineRankRecord = await HourRankRecord.find({
+    type: setChineseTypeNameByProjectType(projectType)
+  }).nor(uriObjectInArray)
   console.log(offLineRankProject)
   console.log(offLineRankRecord)
 }
