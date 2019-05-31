@@ -3,21 +3,40 @@ const router = express.Router()
 const Project = require('../models/project')
 const Reward = require('../models/reward')
 
-router.get('/:projectURI', (req, res) => {
-  Project.find({
-    uri: req.params.projectURI
-  }).sort({ date: 1 }).then(projects => {
-    let projectInfo = projects[projects.length - 1]
-    let dateAxisData = []
-    let raiseAxisData = []
-    projects.map(project => {
-      dateAxisData.push(project.date)
-      raiseAxisData.push(project.raise)
-    })
-    let dateAxisDataString = JSON.stringify(dateAxisData)
-    let raiseAxisDataString = JSON.stringify(raiseAxisData)
-    res.render('project', { projectInfo, dateAxisDataString, raiseAxisDataString })
+router.get('/:projectURI', async (req, res) => {
+  let projects = await Project.find({ uri: req.params.projectURI }).sort({ date: 1 }).exec()
+
+  let projectInfo = projects[projects.length - 1]
+  let dateAxisData = []
+  let raiseAxisData = []
+  let backerAxisData = []
+  projects.map(project => {
+    dateAxisData.push(project.date)
+    raiseAxisData.push(project.raise)
+    backerAxisData.push(project.backers)
   })
+
+  let dailyRaiseData = []
+  let yesterdayRaise = 0
+  raiseAxisData.map(todayRaise => {
+    dailyRaiseData.push(todayRaise - yesterdayRaise)
+    yesterdayRaise = todayRaise
+  })
+
+  let dailyBackerData = []
+  let yesterdaybacker = 0
+  backerAxisData.map(todayBacker => {
+    dailyBackerData.push(todayBacker - yesterdaybacker)
+    yesterdaybacker = todayBacker
+  })
+
+  let dateAxisDataString = JSON.stringify(dateAxisData)
+  let raiseAxisDataString = JSON.stringify(raiseAxisData)
+  let dailyRaiseDataString = JSON.stringify(dailyRaiseData)
+  let backerAxisDataString = JSON.stringify(backerAxisData)
+  let dailyBackerDataString = JSON.stringify(dailyBackerData)
+
+  res.render('project', { projectInfo, dateAxisDataString, raiseAxisDataString, dailyRaiseDataString, backerAxisDataString, dailyBackerDataString })
 })
 
 module.exports = router

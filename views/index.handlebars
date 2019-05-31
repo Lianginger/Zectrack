@@ -7,7 +7,7 @@
     <li><a href="/project/lessdosoap">LESSDO 世界第一台家用自皂機，自己的肥皂自己做！</a></li>
   </ul>
 </div>
-<h1 class="text-center my-5">過去一小時金額排行榜</h1>
+<h2 class="text-center my-5">過去 1 小時金額排行榜</h2>
 <div class="container">
   <div class="card-deck mb-3">
     {{#each firstThreeProjects}}
@@ -23,9 +23,9 @@
           <h5 class="card-title">{{this.name}}</h5>
         </a>
 
-        <p class="card-text">{{this.type}}｜{{this.category}}｜專案倒數 {{this.left}} {{this.leftUnit}}</p>
+        <p class="card-text">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
         <h3>NT$ {{this.hourRaiseString}}</h3>
-        <p class="card-text"><small class="text-muted">數據更新時間 {{this.date}}</small></p>
+        <p class="card-text"><small class="text-muted">資料更新時間 {{this.date}}</small></p>
       </div>
     </div>
     {{/each}}
@@ -44,10 +44,10 @@
       </div>
       <div class="row">
         <div class="col-6">
-          <p class="mb-1">{{this.type}}｜{{this.category}}｜專案倒數 {{this.left}} {{this.leftUnit}}</p>
+          <p class="mb-1">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
         </div>
         <div class="col-6 text-right">
-          <small>數據更新時間 {{this.date}}</small>
+          <small>資料更新時間 {{this.date}}</small>
         </div>
       </div>
     </a>
