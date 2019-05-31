@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans+TC|Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+TC|Rajdhani:600&display=swap');
 
 body {
   font-family: 'Noto Sans TC', sans-serif;
 }
 
 #logo {
-  font-family: 'Righteous', cursive;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 2em;
 }
