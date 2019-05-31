@@ -2,8 +2,27 @@
   <a href="https://www.zeczec.com/projects/{{projectInfo.uri}}">
     <h2 class="text-center my-5">{{{projectInfo.name}}}</h2>
   </a>
-  <div id="project-raise-chart"></div>
-  <div id="project-backer-chart"></div>
+  <div class="row">
+    <div class="col-md-6">
+      <div
+        style="background-image: url({{projectInfo.image}}); background-size: cover; padding-bottom: 64%; background-position: center;">
+      </div>
+    </div>
+    <div class="col-md-6 d-flex align-items-center">
+      <div class="col">
+        <p>{{{projectInfo.type}}}｜{{{projectInfo.category}}}</p>
+        <h4>NT$ {{{projectInfo.raiseString}}}</h4>
+        <p>目標 NT$ {{{projectInfo.goalString}}}</p>
+        <hr>
+        <p class="m-0">贊助人數： {{{projectInfo.backersString}}}</p>
+        <p class="m-0">剩餘時間： {{{projectInfo.left}}} {{{projectInfo.leftUnit}}}</p>
+        <p class="m-0">時程： {{{projectInfo.start}}} - {{{projectInfo.end}}}</p>
+        <hr>
+      </div>
+    </div>
+  </div>
+  <div class="my-3" id="project-raise-chart"></div>
+  <div class="my-3" id="project-backer-chart"></div>
 </div>
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>

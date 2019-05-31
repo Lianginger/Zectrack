@@ -1,16 +1,16 @@
 const request = require('request')
 const cheerio = require('cheerio')
 const baseUrl = 'https://www.zeczec.com/projects/'
-const projectURIArray = ['yexinumbrella', 'lessdosoap']
+// const projectURIArray = ['yexinumbrella', 'lessdosoap']
 const moment = require('moment')
 const tz = require('moment-timezone')
 const Project = require('./models/project')
 const Reward = require('./models/reward')
 const intervalTime = 1000 * 60 * 5
 
-function runZectrack() {
+function runZectrack(projectURIArray) {
   crawlProjectStart(projectURIArray)
-  setInterval(crawlProjectStart, intervalTime, projectURIArray)
+  // setInterval(crawlProjectStart, intervalTime, projectURIArray)
 }
 
 function crawlProjectStart(projectURIArray) {
@@ -77,15 +77,19 @@ function crawlProjectInfoData(projectURI) {
       const projectInfo = {
         type: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.dark-gray.b.dib').text(),
         category: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.gray.b.dib').text(),
+        image: $('body > div.container.mv4-l.mt3-l > div > div.w-70-l.w-100.ph3-l > div > div').attr('style').substring(23).replace("')", ""),
         name: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2) > h2').text(),
         raise: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f3.b.js-sum-raised').text().replace(/[^0-9]/g, "")),
         goal: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f7.mt2').text().replace(/[^0-9]/g, "")),
         backers: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-backers-count').text()),
+        left: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-time-left').text().replace(/[^0-9]/g, "")),
+        leftUnit: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-time-left').text().substr(-2, 2).replace(" ", ""),
         start: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(4, 20),
         end: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7').text().substring(23, 39),
         date: moment().tz('Asia/Taipei').format('YYYY-MM-DD'),
         uri: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)').attr('href').substring(10)
       }
+      console.log(projectInfo)
       return resolve(projectInfo)
     })
   })

@@ -2,11 +2,16 @@ const express = require('express')
 const router = express.Router()
 const Project = require('../models/project')
 const Reward = require('../models/reward')
+const numeral = require('numeral')
 
 router.get('/:projectURI', async (req, res) => {
   let projects = await Project.find({ uri: req.params.projectURI }).sort({ date: 1 }).exec()
 
   let projectInfo = projects[projects.length - 1]
+  projectInfo.raiseString = numeral(projectInfo.raise).format('0,0')
+  projectInfo.goalString = numeral(projectInfo.goal).format('0,0')
+  projectInfo.backersString = numeral(projectInfo.backers).format('0,0')
+
   let dateAxisData = []
   let raiseAxisData = []
   let backerAxisData = []

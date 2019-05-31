@@ -30,7 +30,7 @@ setInterval(function () {
   http.get("http://zectrack.herokuapp.com/")
 }, 1000 * 60 * 25)
 
-runZectrack()
+// runZectrack()
 runRanktrack()
 
 app.listen(port, () => {

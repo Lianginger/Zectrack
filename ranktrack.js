@@ -6,6 +6,7 @@ const moment = require('moment')
 const tz = require('moment-timezone')
 const HourRankRecord = require('./models/hour-rank-record')
 const HourRankProject = require('./models/hour-rank-project')
+const runZectrack = require('./zectrack')
 const intervalTime = 1000 * 60 * 5
 
 function runRanktrack() {
@@ -28,6 +29,7 @@ async function rankTrack(projectType) {
       uriObjectInArray.push({ uri: thisUri })
     })
     checkAndRankRecords(uriArray)
+    runZectrack(uriArray)
     crawlPage++
   }
   await deleteProjectOffline(projectType, uriObjectInArray)

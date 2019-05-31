@@ -1,14 +1,5 @@
 <div class="container">
-  <h1 class="text-center">Track your favorite project</h1>
-</div>
-<div class="container">
-  <ul>
-    <li><a href="/project/yexinumbrella">反向傘縮小再進化：迎戰雨季、征服艷陽，優雅俐落每一天！</a></li>
-    <li><a href="/project/lessdosoap">LESSDO 世界第一台家用自皂機，自己的肥皂自己做！</a></li>
-  </ul>
-</div>
-<h2 class="text-center my-5">過去 1 小時金額排行榜</h2>
-<div class="container">
+  <h2 class="text-center my-5">過去 1 小時金額排行榜</h2>
   <div class="card-deck mb-3">
     {{#each firstThreeProjects}}
     <div class="card">
@@ -19,7 +10,7 @@
         </div>
       </div>
       <div class="card-body">
-        <a href="https://www.zeczec.com/projects/{{this.uri}}" class="stretched-link">
+        <a href="/project/{{this.uri}}" class="stretched-link">
           <h5 class="card-title">{{this.name}}</h5>
         </a>
 
@@ -33,7 +24,7 @@
 
   <div class="list-group">
     {{#each restProjects}}
-    <a href="https://www.zeczec.com/projects/{{this.uri}}" class="list-group-item list-group-item-action">
+    <a href="/project/{{this.uri}}" class="list-group-item list-group-item-action">
       <div class="row">
         <div class="col-md-8 col-6">
           <h5><span class="badge badge-secondary">No.{{this.rank}}</span> {{this.name}}</h5>
@@ -53,4 +44,14 @@
     </a>
     {{/each}}
   </div>
+</div>
+<div class="container">
+  <h2 class="text-center">Track your favorite project</h2>
+</div>
+<div class="container">
+  <ul>
+    {{#each allProjects}}
+    <li><a href="/project/{{this.uri}}">{{this.name}}</a></li>
+    {{/each}}
+  </ul>
 </div>

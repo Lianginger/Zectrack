@@ -24,7 +24,8 @@ router.get('/', async (req, res) => {
     }
   })
 
-  res.render('index', { firstThreeProjects, restProjects })
+  let allProjects = await Project.find({}).exec()
+  res.render('index', { firstThreeProjects, restProjects, allProjects })
 })
 
 module.exports = router
