@@ -4,6 +4,7 @@ var Schema = mongoose.Schema
 var projectSchema = new Schema({
   type: String,
   category: String,
+  rank: String,
   image: String,
   name: String,
   raise: Number,

@@ -26,7 +26,11 @@ router.get('/', async (req, res) => {
     }
   })
 
-  let allProjects = await Project.find({ date: new RegExp(moment().tz('Asia/Taipei').format('YYYY-MM-DD'), 'i') }).exec()
+  let allProjects = await Project.find({ date: new RegExp(moment().tz('Asia/Taipei').format('YYYY-MM-DD'), 'i') }).sort({ raise: -1 }).exec()
+  allProjects.map((project, index) => {
+    project.raiseString = numeral(project.raise).format('00000000,0')
+    project.rank = numeral(index + 1).format('000,0')
+  })
   res.render('index', { firstThreeProjects, restProjects, allProjects })
 })
 
