@@ -10,7 +10,7 @@ const tz = require('moment-timezone')
 router.get('/', async (req, res) => {
   let hourRankProjects = await HourRankProject.find({})
     .sort({ hourRaise: -1 })
-    .limit(10)
+    .limit(9)
     .exec()
   const firstThreeProjects = []
   const restProjects = []

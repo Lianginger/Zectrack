@@ -9,45 +9,58 @@
             style="font-size: 2em">No.{{this.rank}}</span>
         </div>
       </div>
-      <div class="card-body">
-        <a href="/project/{{this.uri}}" class="stretched-link">
-          <h5 class="card-title">{{this.name}}</h5>
-        </a>
-
-        <p class="card-text">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
-        <h3>NT$ {{this.hourRaiseString}}</h3>
-        <p class="card-text"><small class="text-muted">資料更新時間 {{this.date}}</small></p>
+      <div class="card-body d-flex flex-column">
+        <div> 
+          <a href="/project/{{this.uri}}" class="stretched-link">
+            <h5 class="card-title">{{this.name}}</h5>
+          </a>
+          
+          <p class="card-text">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
+        </div>
+        <div class="mt-auto">
+          <hr>
+          <h3>NT$ {{this.hourRaiseString}}</h3>
+          <p class="card-text"><small class="text-muted">資料更新時間 {{this.date}}</small></p>
+        </div>
       </div>
     </div>
     {{/each}}
   </div>
 
-  <div class="list-group">
+  <div class="card-deck mb-3">
     {{#each restProjects}}
-    <a href="/project/{{this.uri}}" class="list-group-item list-group-item-action">
-      <div class="row">
-        <div class="col-md-8 col-6">
-          <h5><span class="badge badge-secondary">No.{{this.rank}}</span> {{this.name}}</h5>
+    <div class="col-md-4 col-12 p-0 mb-3">
+      <div class="card h-100">
+        <div class="position-relative"
+          style="background-image: url({{this.image}}); background-size: cover; padding-bottom: 64%; background-position: center;">
+          <div class="position-absolute" style="top: -0.5em; left: -0.5em;"><span class="badge badge-secondary"
+              style="font-size: 1.5em">No.{{this.rank}}</span>
+          </div>
         </div>
-        <div class="col-md-4 col-6 text-right">
-          <h3>NT$ {{this.hourRaiseString}}</h3>
+        <div class="card-body d-flex flex-column">
+          <div>
+            <a href="/project/{{this.uri}}" class="stretched-link">
+              <h5 class="card-title">{{this.name}}</h5>
+            </a>
+      
+            <p class="card-text">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
+          </div>
+          <div class="mt-auto">
+            <hr>
+            <h3>NT$ {{this.hourRaiseString}}</h3>
+            <p class="card-text"><small class="text-muted">資料更新時間 {{this.date}}</small></p>
+          </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-6">
-          <p class="mb-1">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
-        </div>
-        <div class="col-6 text-right">
-          <small>資料更新時間 {{this.date}}</small>
-        </div>
-      </div>
-    </a>
+    </div>
+    
     {{/each}}
   </div>
 </div>
+
 <div class="container">
-  <h2 class="text-center mt-3">在線集資排行榜</h2>
-  <p class="text-center">目前共有 {{numberOfLiveProject}} 個專案火熱集資中</p>
+  <h2 class="text-center mt-3">火熱集資排行榜</h2>
+  <p class="text-center">目前共有 {{numberOfLiveProject}} 個專案上線集資中</p>
 </div>
 <div class="container">
   <ul>
