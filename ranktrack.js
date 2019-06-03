@@ -4,6 +4,8 @@ const projectTypes = ['presale', 'crowdfunding']
 const baseUrl = 'https://www.zeczec.com/categories?'
 const moment = require('moment')
 const tz = require('moment-timezone')
+const numeral = require('numeral')
+const Project = require('./models/project')
 const HourRankRecord = require('./models/hour-rank-record')
 const HourRankProject = require('./models/hour-rank-project')
 const runZectrack = require('./zectrack')
@@ -14,6 +16,8 @@ function runRanktrack() {
     rankTrack(projectType)
     setInterval(rankTrack, intervalTime, projectType)
   })
+  rankAllLiveProject()
+  setInterval(rankAllLiveProject, intervalTime)
 }
 
 async function rankTrack(projectType) {
@@ -33,6 +37,34 @@ async function rankTrack(projectType) {
     crawlPage++
   }
   await deleteProjectOffline(projectType, uriObjectInArray)
+}
+
+async function rankAllLiveProject() {
+  let allProjects = await Project.find({ date: new RegExp(moment().tz('Asia/Taipei').format('YYYY-MM-DD'), 'i') }).sort({ raise: -1 }).exec()
+
+  let promises = allProjects.map(async (project, index) => {
+    project.raiseString = numeral(project.raise).format('00000000,0')
+    project.rank = numeral(index + 1).format('000,0')
+
+    let yesterdayProject = await Project.find({
+      date: new RegExp(moment().tz('Asia/Taipei').subtract(1, 'days').format('YYYY-MM-DD'), 'i'),
+      uri: project.uri
+    }).exec()
+
+    if (yesterdayProject) {
+      if (!yesterdayProject.rank) {
+        yesterdayProject.rank = allProjects.length
+      }
+      project.rankDiff = numeral(yesterdayProject.rank - parseInt(project.rank)).format('+00,0')
+    } else {
+      project.rankDiff = numeral(allProjects.length - parseInt(project.rank)).format('+0,0')
+    }
+
+    await project.save()
+    return 'rank ok'
+  })
+
+  await Promise.all(promises)
 }
 
 async function deleteProjectOffline(projectType, uriObjectInArray) {

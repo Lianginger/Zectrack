@@ -65,7 +65,7 @@
 <div class="container">
   <ul>
     {{#each allProjects}}
-    <li><a href="/project/{{this.uri}}">No.{{this.rank}}｜NT$ {{this.raiseString}}｜{{this.name}}</a></li>
+    <li><a href="/project/{{this.uri}}">{{this.rankDiff}}｜No.{{this.rank}}｜NT$ {{this.raiseString}}｜{{this.name}}</a></li>
     {{/each}}
   </ul>
 </div>
