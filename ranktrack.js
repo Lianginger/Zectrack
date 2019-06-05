@@ -11,16 +11,21 @@ const HourRankProject = require('./models/hour-rank-project')
 const runZectrack = require('./zectrack')
 const intervalTime = 1000 * 60 * 5
 
-function runRanktrack() {
-  projectTypes.map(projectType => {
-    rankTrack(projectType)
-    setInterval(rankTrack, intervalTime, projectType)
-  })
-  rankAllLiveProject()
-  setInterval(rankAllLiveProject, intervalTime)
+function runRanktrackIntervally() {
+  runRanktrack()
+  setInterval(runRanktrack, intervalTime)
 }
 
-async function rankTrack(projectType) {
+async function runRanktrack() {
+  let promises = projectTypes.map(async projectType => {
+    await trackHourRank(projectType)
+    return 'trackHourRank ok'
+  })
+  await Promise.all(promises)
+  rankAllLiveProject()
+}
+
+async function trackHourRank(projectType) {
   const numberOfPageToCrawl = await getNumberOfPage(projectType)
   let crawlPage = 1
   let uriObjectInArray = []
@@ -46,7 +51,7 @@ async function rankAllLiveProject() {
     project.raiseString = numeral(project.raise).format('00000000,0')
     project.rank = numeral(index + 1).format('000,0')
 
-    let yesterdayProject = await Project.find({
+    let yesterdayProject = await Project.findOne({
       date: new RegExp(moment().tz('Asia/Taipei').subtract(1, 'days').format('YYYY-MM-DD'), 'i'),
       uri: project.uri
     }).exec()
@@ -55,9 +60,9 @@ async function rankAllLiveProject() {
       if (!yesterdayProject.rank) {
         yesterdayProject.rank = allProjects.length
       }
-      project.rankDiff = numeral(yesterdayProject.rank - parseInt(project.rank)).format('+00,0')
+      project.rankDiff = setRankDiffToArrowSign(project, parseInt(yesterdayProject.rank) - parseInt(project.rank))
     } else {
-      project.rankDiff = numeral(allProjects.length - parseInt(project.rank)).format('+0,0')
+      project.rankDiff = setRankDiffToArrowSign(project, allProjects.length - parseInt(project.rank))
     }
 
     await project.save()
@@ -65,6 +70,18 @@ async function rankAllLiveProject() {
   })
 
   await Promise.all(promises)
+}
+
+function setRankDiffToArrowSign(project, number) {
+  if (number === 0) {
+    return `-------`
+  } else if (number > 0) {
+    project.rankDiffUp = 'text-danger'
+    return `▲ ` + numeral(number).format('00,0')
+  } else if (number < 0) {
+    project.rankDiffDown = 'text-success'
+    return `▼ ` + numeral(number).format('00,0')
+  }
 }
 
 async function deleteProjectOffline(projectType, uriObjectInArray) {
@@ -202,4 +219,4 @@ function setChineseTypeNameByProjectType(projectType) {
   }
 }
 
-module.exports = runRanktrack
+module.exports = runRanktrackIntervally

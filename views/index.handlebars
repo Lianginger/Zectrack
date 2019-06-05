@@ -10,11 +10,11 @@
         </div>
       </div>
       <div class="card-body d-flex flex-column">
-        <div> 
+        <div>
           <a href="/project/{{this.uri}}" class="stretched-link">
             <h5 class="card-title">{{this.name}}</h5>
           </a>
-          
+
           <p class="card-text">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
         </div>
         <div class="mt-auto">
@@ -42,7 +42,7 @@
             <a href="/project/{{this.uri}}" class="stretched-link">
               <h5 class="card-title">{{this.name}}</h5>
             </a>
-      
+
             <p class="card-text">{{this.type}}｜{{this.category}}｜倒數 {{this.left}} {{this.leftUnit}}</p>
           </div>
           <div class="mt-auto">
@@ -53,7 +53,7 @@
         </div>
       </div>
     </div>
-    
+
     {{/each}}
   </div>
 </div>
@@ -65,7 +65,9 @@
 <div class="container">
   <ul>
     {{#each allProjects}}
-    <li><a href="/project/{{this.uri}}">{{this.rankDiff}}｜No.{{this.rank}}｜NT$ {{this.raiseString}}｜{{this.name}}</a></li>
+    <li><span class="{{this.rankDiffUp}}{{this.rankDiffDown}}">{{this.rankDiff}}</span><a
+        href="/project/{{this.uri}}">｜No.{{this.rank}}｜NT$ {{this.raiseString}}｜{{this.name}}</a>
+    </li>
     {{/each}}
   </ul>
 </div>

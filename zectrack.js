@@ -10,7 +10,6 @@ const intervalTime = 1000 * 60 * 5
 
 function runZectrack(projectURIArray) {
   crawlProjectStart(projectURIArray)
-  // setInterval(crawlProjectStart, intervalTime, projectURIArray)
 }
 
 function crawlProjectStart(projectURIArray) {

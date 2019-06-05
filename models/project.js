@@ -6,6 +6,8 @@ var projectSchema = new Schema({
   category: String,
   rank: String,
   rankDiff: String,
+  rankDiffUp: String,
+  rankDiffDown: String,
   image: String,
   name: String,
   raise: Number,
