@@ -15,10 +15,12 @@ router.get('/:projectURI', async (req, res) => {
   let dateAxisData = []
   let raiseAxisData = []
   let backerAxisData = []
+  let rankAxisData = []
   projects.map(project => {
     dateAxisData.push(project.date)
     raiseAxisData.push(project.raise)
     backerAxisData.push(project.backers)
+    rankAxisData.push(parseInt(project.rank))
   })
 
   let dailyRaiseData = []
@@ -40,8 +42,9 @@ router.get('/:projectURI', async (req, res) => {
   let dailyRaiseDataString = JSON.stringify(dailyRaiseData)
   let backerAxisDataString = JSON.stringify(backerAxisData)
   let dailyBackerDataString = JSON.stringify(dailyBackerData)
+  let rankAxisDataString = JSON.stringify(rankAxisData)
 
-  res.render('project', { projectInfo, dateAxisDataString, raiseAxisDataString, dailyRaiseDataString, backerAxisDataString, dailyBackerDataString })
+  res.render('project', { projectInfo, dateAxisDataString, raiseAxisDataString, dailyRaiseDataString, backerAxisDataString, dailyBackerDataString, rankAxisDataString })
 })
 
 module.exports = router

@@ -21,6 +21,7 @@
       </div>
     </div>
   </div>
+  <div class="my-3" id="project-rank-chart"></div>
   <div class="my-3" id="project-raise-chart"></div>
   <div class="my-3" id="project-backer-chart"></div>
 </div>
@@ -39,6 +40,41 @@
     }
   });
 
+  Highcharts.chart('project-rank-chart', {
+      chart: {
+        type: 'line'
+      },
+      colors: ['#c42525'],
+      title: {
+        text: '在線排行榜'
+      },
+      subtitle: {
+        text: ''
+      },
+      xAxis: {
+        categories: {{{ dateAxisDataString}}}
+      },
+      yAxis: {
+        reversed: true,
+        tickInterval: 10,
+        title: {
+          text: '排行榜'
+        }
+      },
+      plotOptions: {
+        line: {
+          dataLabels: {
+            enabled: true
+          },
+          enableMouseTracking: false
+        }
+      },
+      series: [{
+        name: '',
+        data: {{{ rankAxisDataString}}}
+      }]
+    });
+
   Highcharts.chart('project-raise-chart', {
     chart: {
       zoomType: 'xy'
@@ -47,7 +83,7 @@
       text: '集資累積金額'
     },
     subtitle: {
-      text: '{{{projectInfo.start}}} - {{{projectInfo.end}}}'
+      text: ''
     },
     xAxis: [{
       categories: {{{ dateAxisDataString }}},
