@@ -74,13 +74,16 @@ async function rankAllLiveProject() {
 
 function setRankDiffToArrowSign(project, number) {
   if (number === 0) {
-    return `-------`
+    project.rankDiffUp = 'text-white'
+    return `▲ ` + numeral(number).format('(00,0)')
   } else if (number > 0) {
-    project.rankDiffUp = 'text-danger'
-    return `▲ ` + numeral(number).format('00,0')
+    if (number > 9) { project.rankDiffUp = 'text-white bg-danger' }
+    if (number <= 9) { project.rankDiffUp = 'text-danger' }
+    return `▲ ` + numeral(number).format('(00,0)')
   } else if (number < 0) {
-    project.rankDiffDown = 'text-success'
-    return `▼ ` + numeral(number).format('00,0')
+    if (number >= -9) { project.rankDiffUp = 'text-success' }
+    if (number < -9) { project.rankDiffUp = 'text-white bg-success' }
+    return `▼ ` + numeral(number).format('(00,0)')
   }
 }
 
