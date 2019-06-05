@@ -1,6 +1,7 @@
 <div class="container">
-  <h2 class="text-center my-5">過去 1 小時金額排行榜</h2>
-  <div class="card-deck mb-3">
+  <h1 class="text-center mt-5">趨勢排行榜</h1>
+  <p class="text-center">過去一小時內，集資金額排行</p>
+  <div class="card-deck my-5">
     {{#each firstThreeProjects}}
     <div class="card">
       <div class="position-relative"
@@ -58,15 +59,16 @@
   </div>
 </div>
 
-<div class="container">
-  <h2 class="text-center mt-3">火熱集資排行榜</h2>
-  <p class="text-center">目前共有 {{numberOfLiveProject}} 個專案上線集資中</p>
+<div class="container my-5">
+  <h1 class="text-center">火熱集資排行榜</h1>
+  <p class="text-center">目前共有 {{numberOfLiveProject}} 個專案上線集資中，依總金額排序</p>
 </div>
 <div class="container">
-  <ul>
+  <ul class="list-group">
     {{#each allProjects}}
-    <li><span class="{{this.rankDiffUp}}{{this.rankDiffDown}} px-1">{{this.rankDiff}}</span><a
-        href="/project/{{this.uri}}">｜No.{{this.rank}}｜NT$ {{this.raiseString}}｜{{this.name}}</a>
+    <li class="list-group-item">
+      <span class="{{this.rankDiffClass}} px-2 rounded">{{this.rankDiff}}</span>｜No.{{this.rank}}｜NT$
+      {{this.raiseString}}｜<a href="/project/{{this.uri}}">{{this.name}}</a>
     </li>
     {{/each}}
   </ul>
