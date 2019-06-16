@@ -1,3 +1,8 @@
+// 判別開發環境
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config() // 使用 dotenv 讀取 .env 檔案
+}
+
 const express = require('express')
 const app = express()
 const http = require('http')
@@ -15,6 +20,12 @@ db.once('open', function () {
   console.log('MongoDB is connected!')
 })
 mongoose.set('debug', true)
+
+// 登入後可以取得使用者的資訊方便我們在 view 裡面直接使用
+app.use((req, res, next) => {
+  res.locals.GTMID = process.env.GTMID
+  next()
+})
 
 // 設定模板引擎
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
