@@ -10,10 +10,16 @@
 
 ## 功能
 
+- 每五分鐘更新一次數據
 - 排行過去 1 小時集資金額
+
+  ![trend-rank](https://github.com/Lianginger/Zectrack/blob/master/public/image/trend-rank.png)
+
+- 排行在線集資專案，並呈現與昨日相比的名次升降
+
+  ![today-rank](https://github.com/Lianginger/Zectrack/blob/master/public/image/today-rank.png)
+
 - 追蹤累積成長金額和每日成長金額
 - 追蹤累積成長人數和每日成長人數
 
-![trend-rank](https://github.com/Lianginger/Zectrack/blob/master/public/image/trend-rank.png)  
-![today-rank](https://github.com/Lianginger/Zectrack/blob/master/public/image/today-rank.png)  
-![project](https://github.com/Lianginger/Zectrack/blob/master/public/image/project.png)
+  ![project](https://github.com/Lianginger/Zectrack/blob/master/public/image/project.png)
