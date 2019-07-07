@@ -1,0 +1,228 @@
+<div class="w-100">
+  <hr>
+  <div class="w-100">
+    <a href="https://www.zectrack.today/" class="float-right" target="_blank">>>探索更多熱門專案</a>
+    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="project-raise-chart-tab" data-toggle="pill" href="#project-raise-chart" role="tab"
+          aria-controls="project-raise-chart" aria-selected="true">集資金額</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="project-backer-chart-tab" data-toggle="pill" href="#project-backer-chart" role="tab"
+          aria-controls="project-backer-chart" aria-selected="false">贊助人數</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="project-rank-chart-tab" data-toggle="pill" href="#project-rank-chart" role="tab"
+          aria-controls="project-rank-chart" aria-selected="false">在線排行</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="project-raise-chart" role="tabpanel"
+        aria-labelledby="project-raise-chart-tab">...</div>
+      <div class="tab-pane fade" id="project-backer-chart" role="tabpanel" aria-labelledby="project-backer-chart-tab">...
+      </div>
+      <div class="tab-pane fade" id="project-rank-chart" role="tabpanel" aria-labelledby="project-rank-chart-tab">...</div>
+    </div>
+  </div>
+  <hr>
+</div>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script>
+  Highcharts.setOptions({
+    chart: {
+      style: {
+        fontFamily: 'Noto Sans TC'
+      }
+    }
+  });
+
+  Highcharts.chart('project-rank-chart', {
+    chart: {
+      type: 'line'
+    },
+    colors: ['#c42525'],
+    title: {
+      text: ''//集資期間累積金額在線排行榜
+    },
+    subtitle: {
+      text: ''
+    },
+    xAxis: {
+      categories: {{{ dateAxisDataString }}}
+      },
+    yAxis: {
+      reversed: true,
+      tickInterval: 10,
+      title: {
+        text: '排行榜'
+      }
+    },
+    plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true
+        },
+        enableMouseTracking: false
+      }
+    },
+    series: [{
+      name: '在線金額排行',
+      data: {{{ rankAxisDataString }}}
+      }]
+    });
+
+  Highcharts.chart('project-raise-chart', {
+    chart: {
+      zoomType: 'xy'
+    },
+    title: {
+      text: ''//集資金額表
+    },
+    subtitle: {
+      text: ''
+    },
+    xAxis: [{
+      categories: {{{ dateAxisDataString }}},
+    crosshair: true
+    }],
+    yAxis: [{ // Primary yAxis
+      labels: {
+        formatter: function () {
+          var label = numeral(numeral(this.axis.defaultLabelFormatter.call(this)).value()).format('0,0')
+          return label;
+        },
+        style: {
+          color: Highcharts.getOptions().colors[1]
+        }
+      },
+      title: {
+        text: '累積集資金額',
+        style: {
+          color: Highcharts.getOptions().colors[1]
+        }
+      }
+    }, { // Secondary yAxis
+      title: {
+        text: '每日集資金額',
+        style: {
+          color: Highcharts.getOptions().colors[0]
+        }
+      },
+      labels: {
+        formatter: function () {
+          var label = this.axis.defaultLabelFormatter.call(this)
+          return label;
+        },
+        style: {
+          color: Highcharts.getOptions().colors[0]
+        }
+      },
+      opposite: true
+    }],
+    tooltip: {
+      shared: true
+    },
+    legend: {
+      layout: 'vertical',
+      backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)'
+    },
+    series: [{
+      name: '每日集資金額',
+      type: 'column',
+      yAxis: 1,
+      data: {{{ dailyRaiseDataString }}},
+      tooltip: {
+      pointFormatter: function () { return '每日集資金額:<b> NT$ ' + numeral(this.y).format('0,0') + '</b><br>' }
+    }
+
+    }, {
+      name: '累積集資金額',
+      type: 'spline',
+      data: {{{ raiseAxisDataString }}},
+      tooltip: {
+      pointFormatter: function () { return '累積集資金額:<b> NT$ ' + numeral(this.y).format('0,0') + '</b>' }
+    }
+    }]
+  })
+
+
+  Highcharts.chart('project-backer-chart', {
+    chart: {
+      zoomType: 'xy'
+    },
+    colors: ['#f28f43', '#0d233a'],
+    title: {
+      text: ''//集資人數表
+    },
+    subtitle: {
+      text: ''
+    },
+    xAxis: [{
+      categories: {{{ dateAxisDataString }}},
+    crosshair: true
+    }],
+    yAxis: [{ // Primary yAxis
+      labels: {
+        formatter: function () {
+          var label = numeral(numeral(this.axis.defaultLabelFormatter.call(this)).value()).format('0,0')
+          return label;
+        },
+        style: {
+          color: Highcharts.getOptions().colors[1]
+        }
+      },
+      title: {
+        text: '累積集資人數',
+        style: {
+          color: Highcharts.getOptions().colors[1]
+        }
+      }
+    }, { // Secondary yAxis
+      title: {
+        text: '每日集資人數',
+        style: {
+          color: Highcharts.getOptions().colors[0]
+        }
+      },
+      labels: {
+        formatter: function () {
+          var label = this.axis.defaultLabelFormatter.call(this)
+          return label;
+        },
+        style: {
+          color: Highcharts.getOptions().colors[0]
+        }
+      },
+      opposite: true
+    }],
+    tooltip: {
+      shared: true
+    },
+    legend: {
+      layout: 'vertical',
+      backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)'
+    },
+    series: [{
+      name: '每日集資人數',
+      type: 'column',
+      yAxis: 1,
+      data: {{{ dailyBackerDataString }}},
+      tooltip: {
+      pointFormatter: function () { return '每日集資人數:<b> ' + numeral(this.y).format('0,0') + '</b><br>' }
+    }
+
+    }, {
+      name: '累積集資人數',
+      type: 'spline',
+      data: {{{ backerAxisDataString }}},
+      tooltip: {
+      pointFormatter: function () { return '累積集資人數:<b> ' + numeral(this.y).format('0,0') + '</b>' }
+    }
+    }]
+  })
+</script>

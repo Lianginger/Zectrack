@@ -8,3 +8,15 @@ body {
   font-family: 'Rajdhani', sans-serif;
   font-size: 2em;
 }
+
+/* not active */
+.nav-pills .nav-item .nav-link:not(.active) {
+  background-color: white;
+  color: black;
+}
+
+/* active (faded) */
+.nav-pills .nav-item .nav-link {
+  background-color: black;
+  color: white;
+}
