@@ -11,17 +11,21 @@ const exphbs = require('express-handlebars')
 const mongoose = require('mongoose')
 const runZectrack = require('./zectrack')
 const runRanktrack = require('./ranktrack')
+const cors = require('cors')
 
 // 設定連線到 mongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/zectrack', { useNewUrlParser: true })
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/zectrack', {
+  useNewUrlParser: true
+})
 const db = mongoose.connection
 db.on('error', console.error.bind(console, 'connection error:'))
-db.once('open', function () {
+db.once('open', function() {
   console.log('MongoDB is connected!')
 })
 mongoose.set('debug', true)
 
 // 登入後可以取得使用者的資訊方便我們在 view 裡面直接使用
+app.use(cors())
 app.use((req, res, next) => {
   res.locals.GTMID = process.env.GTMID
   next()
@@ -37,8 +41,8 @@ app.use('/', require('./routes/home'))
 app.use('/project', require('./routes/project'))
 
 // Set to keep Heroku app awake
-setInterval(function () {
-  http.get("http://zectrack.herokuapp.com/")
+setInterval(function() {
+  http.get('http://zectrack.herokuapp.com/')
 }, 1000 * 60 * 25)
 
 // runZectrack()
