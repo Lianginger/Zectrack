@@ -116,9 +116,11 @@ function crawlProjectInfoData(projectURI) {
         date: moment()
           .tz('Asia/Taipei')
           .format('YYYY-MM-DD'),
-        uri: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)')
-          .attr('href')
-          .substring(10)
+        uri: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)').attr('href')
+          ? $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)')
+              .attr('href')
+              .substring(10)
+          : ''
       }
       console.log(projectInfo)
       return resolve(projectInfo)
