@@ -6,7 +6,8 @@
 
 全球最大群眾募資平台 [Kickstarter](https://www.kickstarter.com/) 有 [Kicktraq](https://www.kicktraq.com/) 分析神器，那就來做一個台灣最大群眾募資平台[嘖嘖](https://www.zeczec.com/)的分析神器 [Zectrack](https://www.zectrack.today/) 吧！
 
-探索最新趨勢、分析熱門崛起的募資專案 👉 https://www.zectrack.today/
+探索最新趨勢、分析熱門崛起的募資專案 👉 https://www.zectrack.today/  
+相關專案 => [Zectrack Chrome 擴充套件](https://github.com/Lianginger/zectrack-extension)
 
 ## 功能
 
