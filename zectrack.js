@@ -120,8 +120,9 @@ function crawlProjectInfoData(projectURI) {
           ? $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)')
               .attr('href')
               .substring(10)
-          : ''
+          : projectURI
       }
+
       console.log(projectInfo)
       return resolve(projectInfo)
     })
