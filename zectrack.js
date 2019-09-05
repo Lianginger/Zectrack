@@ -7,17 +7,19 @@ const tz = require('moment-timezone')
 const Project = require('./models/project')
 const Reward = require('./models/reward')
 const intervalTime = 1000 * 60 * 5
+let dateNow = ''
 
 function runZectrack(projectURIArray) {
   crawlProjectStart(projectURIArray)
 }
 
 function crawlProjectStart(projectURIArray) {
+  dateNow = moment()
+    .tz('Asia/Taipei')
+    .format('YYYY-MM-DD')
   projectURIArray.map(projectURI => {
     Project.findOne({
-      date: moment()
-        .tz('Asia/Taipei')
-        .format('YYYY-MM-DD'),
+      date: dateNow,
       uri: projectURI
     }).then(project => {
       if (project) {
@@ -38,9 +40,7 @@ async function updateProject(project, projectURI) {
   project.save().then(
     rewards.map(rewardFromCrawl => {
       Reward.findOne({
-        date: moment()
-          .tz('Asia/Taipei')
-          .format('YYYY-MM-DD'),
+        date: dateNow,
         name: rewardFromCrawl.name,
         uri: projectURI
       }).then(rewardFromDB => {
@@ -113,9 +113,7 @@ function crawlProjectInfoData(projectURI) {
         end: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7')
           .text()
           .substring(23, 39),
-        date: moment()
-          .tz('Asia/Taipei')
-          .format('YYYY-MM-DD'),
+        date: dateNow,
         uri: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)').attr('href')
           ? $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)')
               .attr('href')
@@ -156,9 +154,7 @@ function crawlProjectRewardsData(projectURI) {
             .text()
             .replace(/[^0-9]/g, '')
         )
-        reward.date = moment()
-          .tz('Asia/Taipei')
-          .format('YYYY-MM-DD')
+        reward.date = dateNow
         reward.uri = projectURI
         rewards[i] = reward
       })
