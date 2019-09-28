@@ -9,14 +9,12 @@ const Reward = require('./models/reward')
 const intervalTime = 1000 * 60 * 5
 let dateNow = ''
 
-function runZectrack(projectURIArray) {
-  crawlProjectStart(projectURIArray)
+function runZectrack(projectURIArray, checkDate) {
+  crawlProjectStart(projectURIArray, checkDate)
 }
 
-function crawlProjectStart(projectURIArray) {
-  dateNow = moment()
-    .tz('Asia/Taipei')
-    .format('YYYY-MM-DD')
+function crawlProjectStart(projectURIArray, checkDate) {
+  dateNow = checkDate
   projectURIArray.map(projectURI => {
     Project.findOne({
       date: dateNow,

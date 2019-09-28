@@ -29,6 +29,9 @@ async function trackHourRank(projectType) {
   const numberOfPageToCrawl = await getNumberOfPage(projectType)
   let crawlPage = 1
   let uriObjectInArray = []
+  const checkDate = moment()
+    .tz('Asia/Taipei')
+    .format('YYYY-MM-DD')
   while (crawlPage <= numberOfPageToCrawl) {
     const records = await crawlRecord(crawlPage, projectType)
     await HourRankRecord.insertMany(records)
@@ -38,21 +41,36 @@ async function trackHourRank(projectType) {
       uriObjectInArray.push({ uri: thisUri })
     })
     checkAndRankRecords(uriArray)
-    runZectrack(uriArray)
+    runZectrack(uriArray, checkDate)
     crawlPage++
   }
   await deleteProjectOffline(projectType, uriObjectInArray)
 }
 
 async function rankAllLiveProject() {
-  let allProjects = await Project.find({ date: new RegExp(moment().tz('Asia/Taipei').format('YYYY-MM-DD'), 'i') }).sort({ raise: -1 }).exec()
+  let allProjects = await Project.find({
+    date: new RegExp(
+      moment()
+        .tz('Asia/Taipei')
+        .format('YYYY-MM-DD'),
+      'i'
+    )
+  })
+    .sort({ raise: -1 })
+    .exec()
 
   let promises = allProjects.map(async (project, index) => {
     project.raiseString = numeral(project.raise).format('00000000,0')
     project.rank = numeral(index + 1).format('000,0')
 
     let yesterdayProject = await Project.findOne({
-      date: new RegExp(moment().tz('Asia/Taipei').subtract(1, 'days').format('YYYY-MM-DD'), 'i'),
+      date: new RegExp(
+        moment()
+          .tz('Asia/Taipei')
+          .subtract(1, 'days')
+          .format('YYYY-MM-DD'),
+        'i'
+      ),
       uri: project.uri
     }).exec()
 
@@ -77,12 +95,20 @@ function setRankDiffToArrowSign(project, number) {
     project.rankDiffClass = 'text-white'
     return `▲ ` + numeral(number).format('00,0')
   } else if (number > 0) {
-    if (number > 9) { project.rankDiffClass = 'text-white bg-danger' }
-    if (number <= 9) { project.rankDiffClass = 'text-danger' }
+    if (number > 9) {
+      project.rankDiffClass = 'text-white bg-danger'
+    }
+    if (number <= 9) {
+      project.rankDiffClass = 'text-danger'
+    }
     return `▲ ` + numeral(number).format('00,0')
   } else if (number < 0) {
-    if (number >= -9) { project.rankDiffClass = 'text-success' }
-    if (number < -9) { project.rankDiffClass = 'text-white bg-success' }
+    if (number >= -9) {
+      project.rankDiffClass = 'text-success'
+    }
+    if (number < -9) {
+      project.rankDiffClass = 'text-white bg-success'
+    }
     return `▼ ` + numeral(0 - number).format('00,0')
   }
 }
@@ -109,7 +135,9 @@ function checkAndRankRecords(uriArray) {
 }
 
 async function checkAndRankEachProject(uri) {
-  const records = await HourRankRecord.find({ uri }).sort({ date: 1 }).exec()
+  const records = await HourRankRecord.find({ uri })
+    .sort({ date: 1 })
+    .exec()
   // console.log(records)
   // console.log(records.length)
   while (records.length > 13) {
@@ -123,7 +151,9 @@ async function checkAndRankEachProject(uri) {
 
 async function rankProject(uri) {
   const project = await HourRankProject.findOne({ uri }).exec()
-  const records = await HourRankRecord.find({ uri }).sort({ date: 1 }).exec()
+  const records = await HourRankRecord.find({ uri })
+    .sort({ date: 1 })
+    .exec()
   console.log(project)
   if (project) {
     console.log('project exist, update data')
@@ -168,11 +198,15 @@ async function getNumberOfPage(projectType) {
 function isLastPage(page, projectType) {
   return new Promise((resolve, reject) => [
     request(`${baseUrl}page=${page}&type=${projectType}`, (err, res, body) => {
-      if (err) { return reject(err) }
+      if (err) {
+        return reject(err)
+      }
       const $ = cheerio.load(body)
       console.log(`檢查第${page}頁`)
-      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function (i, elem) {
-        const leftString = $(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text()
+      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function(i, elem) {
+        const leftString = $(this)
+          .find('div > div.w-100.absolute.bottom-0.mb3.black > span')
+          .text()
         if (leftString.indexOf('剩下') < 0) {
           resolve(true)
         }
@@ -185,26 +219,64 @@ function isLastPage(page, projectType) {
 function crawlRecord(page, projectType) {
   return new Promise((resolve, reject) => {
     request(`${baseUrl}page=${page}&type=${projectType}`, (err, res, body) => {
-      if (err) { return reject(err) }
+      if (err) {
+        return reject(err)
+      }
       const $ = cheerio.load(body)
 
       const records = []
-      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function (i, elem) {
-        const leftString = $(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text()
+      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function(i, elem) {
+        const leftString = $(this)
+          .find('div > div.w-100.absolute.bottom-0.mb3.black > span')
+          .text()
         if (leftString.indexOf('剩下') < 0) {
           return
         }
 
         const record = {
           type: setChineseTypeNameByProjectType(projectType),
-          category: $(this).find('div > span').text().substring(0, $(this).find('div > span').text().indexOf('By') - 1).replace('\n', ""),
-          image: $(this).find('div > a > div').attr('data-bg-src'),
-          name: $(this).find('div > a > h3').text(),
-          raise: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > div.fr.b').text().replace(/[^0-9]/g, "")),
-          left: parseInt($(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text().replace(/[^0-9]/g, "")),
-          leftUnit: $(this).find('div > div.w-100.absolute.bottom-0.mb3.black > span').text().replace('\n', "").substr(-2, 2).replace(' ', ""),
-          date: moment().tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
-          uri: $(this).find('div > a').attr('href').substring(10)
+          category: $(this)
+            .find('div > span')
+            .text()
+            .substring(
+              0,
+              $(this)
+                .find('div > span')
+                .text()
+                .indexOf('By') - 1
+            )
+            .replace('\n', ''),
+          image: $(this)
+            .find('div > a > div')
+            .attr('data-bg-src'),
+          name: $(this)
+            .find('div > a > h3')
+            .text(),
+          raise: parseInt(
+            $(this)
+              .find('div > div.w-100.absolute.bottom-0.mb3.black > div.fr.b')
+              .text()
+              .replace(/[^0-9]/g, '')
+          ),
+          left: parseInt(
+            $(this)
+              .find('div > div.w-100.absolute.bottom-0.mb3.black > span')
+              .text()
+              .replace(/[^0-9]/g, '')
+          ),
+          leftUnit: $(this)
+            .find('div > div.w-100.absolute.bottom-0.mb3.black > span')
+            .text()
+            .replace('\n', '')
+            .substr(-2, 2)
+            .replace(' ', ''),
+          date: moment()
+            .tz('Asia/Taipei')
+            .format('YYYY-MM-DD HH:mm:ss'),
+          uri: $(this)
+            .find('div > a')
+            .attr('href')
+            .substring(10)
         }
         records.push(record)
       })
