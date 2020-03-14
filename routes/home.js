@@ -26,10 +26,28 @@ router.get('/', async (req, res) => {
     }
   })
 
-  let allProjects = await Project.find({ date: new RegExp(moment().tz('Asia/Taipei').format('YYYY-MM-DD'), 'i') }).sort({ raise: -1 }).exec()
+  let allProjects = await Project.find({
+    date: new RegExp(
+      moment()
+        .tz('Asia/Taipei')
+        .format('YYYY-MM-DD'),
+      'i'
+    )
+  })
+    .sort({ raise: -1 })
+    .exec()
 
   let numberOfLiveProject = allProjects.length
-  res.render('index', { firstThreeProjects, restProjects, allProjects, numberOfLiveProject })
+  res.render('index', {
+    firstThreeProjects,
+    restProjects,
+    allProjects,
+    numberOfLiveProject
+  })
+})
+
+router.get('/privacy', (req, res) => {
+  res.render('privacy')
 })
 
 module.exports = router
