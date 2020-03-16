@@ -6,15 +6,18 @@ const moment = require('moment')
 const tz = require('moment-timezone')
 const Project = require('./models/project')
 const Reward = require('./models/reward')
+const random_useragent = require('random-useragent')
 const intervalTime = 1000 * 60 * 5
 let dateNow = ''
+const crawler = {}
 
-function runZectrack(projectURIArray, checkDate) {
-  crawlProjectStart(projectURIArray, checkDate)
+function runZectrack(projectURIArray, checkDate, crawlerCookie) {
+  crawlProjectStart(projectURIArray, checkDate, crawlerCookie)
 }
 
-function crawlProjectStart(projectURIArray, checkDate) {
+function crawlProjectStart(projectURIArray, checkDate, crawlerCookie) {
   dateNow = checkDate
+  crawler.cookie = crawlerCookie
   projectURIArray.map(projectURI => {
     Project.findOne({
       date: dateNow,
@@ -67,53 +70,90 @@ async function storeNewProject(projectURI) {
 }
 
 function crawlProjectInfoData(projectURI) {
+  const options = {
+    url: baseUrl + projectURI,
+    headers: {
+      'User-Agent': random_useragent.getRandom(),
+      cookie: crawler.cookie
+    }
+  }
   return new Promise((resolve, reject) => {
-    request(baseUrl + projectURI, (err, res, body) => {
+    request(options, (err, res, body) => {
       if (err) {
         return reject(err)
       }
       const $ = cheerio.load(body)
 
       const projectInfo = {
-        type: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.dark-gray.b.dib').text(),
-        category: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.gray.b.dib').text(),
-        image: $('body > div.container.mv4-l.mt3-l > div > div.w-70-l.w-100.ph3-l > div > div').attr('style')
-          ? $('body > div.container.mv4-l.mt3-l > div > div.w-70-l.w-100.ph3-l > div > div')
+        type: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.dark-gray.b.dib'
+        ).text(),
+        category: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mt0-l.mt3 > div > a.gray.b.dib'
+        ).text(),
+        image: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-70-l.w-100.ph3-l > div > div'
+        ).attr('style')
+          ? $(
+              'body > div.container.mv4-l.mt3-l > div > div.w-70-l.w-100.ph3-l > div > div'
+            )
               .attr('style')
               .substring(23)
               .replace("')", '')
           : '',
 
-        name: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2) > h2').text(),
+        name: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2) > h2'
+        ).text(),
         raise: parseInt(
-          $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f3.b.js-sum-raised')
+          $(
+            'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f3.b.js-sum-raised'
+          )
             .text()
             .replace(/[^0-9]/g, '')
         ),
         goal: parseInt(
-          $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f7.mt2')
+          $(
+            'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mv3.relative > div.f7.mt2'
+          )
             .text()
             .replace(/[^0-9]/g, '')
         ),
-        backers: parseInt($('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-backers-count').text()),
+        backers: parseInt(
+          $(
+            'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-backers-count'
+          ).text()
+        ),
         left: parseInt(
-          $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-time-left')
+          $(
+            'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-time-left'
+          )
             .text()
             .replace(/[^0-9]/g, '')
         ),
-        leftUnit: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-time-left')
+        leftUnit: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div > span.js-time-left'
+        )
           .text()
           .substr(-2, 2)
           .replace(' ', ''),
-        start: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7')
+        start: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7'
+        )
           .text()
           .substring(4, 20),
-        end: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7')
+        end: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > div.mb2.f7'
+        )
           .text()
           .substring(23, 39),
         date: dateNow,
-        uri: $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)').attr('href')
-          ? $('body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)')
+        uri: $(
+          'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)'
+        ).attr('href')
+          ? $(
+              'body > div.container.mv4-l.mt3-l > div > div.w-30-l.w-100.ph3 > a:nth-child(2)'
+            )
               .attr('href')
               .substring(10)
           : projectURI
@@ -126,18 +166,29 @@ function crawlProjectInfoData(projectURI) {
 }
 
 function crawlProjectRewardsData(projectURI) {
+  const options = {
+    url: baseUrl + projectURI,
+    headers: {
+      'User-Agent': random_useragent.getRandom(),
+      cookie: crawler.cookie
+    }
+  }
   return new Promise((resolve, reject) => {
-    request(baseUrl + projectURI, (err, res, body) => {
+    request(options, (err, res, body) => {
       if (err) {
         return reject(err)
       }
       const $ = cheerio.load(body)
 
       let rewards = []
-      $('body > div.container.mv4 > div > div.w-30-l.ph3-l.ph0.flex-ns.flex-wrap.flex-column-l.w-100 > div').each(function(i, elem) {
+      $(
+        'body > div.container.mv4 > div > div.w-30-l.ph3-l.ph0.flex-ns.flex-wrap.flex-column-l.w-100 > div'
+      ).each(function(i, elem) {
         let reward = {}
         reward.name = $(this)
-          .find('div.black.f6.mv-child-0.maxh5.maxh-none-ns.overflow-auto > p:nth-child(1)')
+          .find(
+            'div.black.f6.mv-child-0.maxh5.maxh-none-ns.overflow-auto > p:nth-child(1)'
+          )
           .text()
           .split('\n')[0]
         reward.backers =
