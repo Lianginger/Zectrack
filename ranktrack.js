@@ -43,13 +43,13 @@ function login() {
             'user[password]': process.env.CRAWLER_USER_PASSWORD,
             commit: '登入',
             utf8: '✓',
-            authenticity_token: crawler.authenticity_token
+            authenticity_token: crawler.authenticity_token,
           },
           headers: {
-            cookie: crawler.cookie
-          }
+            cookie: crawler.cookie,
+          },
         },
-        function(err, res, body) {
+        function (err, res, body) {
           if (err) {
             console.log(err)
             reject(false)
@@ -57,7 +57,7 @@ function login() {
 
           console.log('=================================')
           // status 302 表示登入跳轉成功
-          if (res.headers.status.includes('302')) {
+          if (res.headers) {
             crawler.cookie = res.headers['set-cookie'][1].split(';')[0]
             request('https://www.zeczec.com/', (err, res, body) => {
               if (err) {
@@ -73,7 +73,7 @@ function login() {
 }
 
 async function runRanktrack() {
-  let promises = projectTypes.map(async projectType => {
+  let promises = projectTypes.map(async (projectType) => {
     await trackHourRank(projectType)
     return 'trackHourRank ok'
   })
@@ -85,15 +85,13 @@ async function trackHourRank(projectType) {
   const numberOfPageToCrawl = await getNumberOfPage(projectType)
   let crawlPage = 1
   let uriObjectInArray = []
-  const checkDate = moment()
-    .tz('Asia/Taipei')
-    .format('YYYY-MM-DD')
+  const checkDate = moment().tz('Asia/Taipei').format('YYYY-MM-DD')
   while (crawlPage <= numberOfPageToCrawl) {
     const records = await crawlRecord(crawlPage, projectType)
     await HourRankRecord.insertMany(records)
 
-    const uriArray = records.map(record => record.uri)
-    uriArray.map(thisUri => {
+    const uriArray = records.map((record) => record.uri)
+    uriArray.map((thisUri) => {
       uriObjectInArray.push({ uri: thisUri })
     })
     checkAndRankRecords(uriArray)
@@ -105,12 +103,7 @@ async function trackHourRank(projectType) {
 
 async function rankAllLiveProject() {
   let allProjects = await Project.find({
-    date: new RegExp(
-      moment()
-        .tz('Asia/Taipei')
-        .format('YYYY-MM-DD'),
-      'i'
-    )
+    date: new RegExp(moment().tz('Asia/Taipei').format('YYYY-MM-DD'), 'i'),
   })
     .sort({ raise: -1 })
     .exec()
@@ -121,13 +114,10 @@ async function rankAllLiveProject() {
 
     let yesterdayProject = await Project.findOne({
       date: new RegExp(
-        moment()
-          .tz('Asia/Taipei')
-          .subtract(1, 'days')
-          .format('YYYY-MM-DD'),
+        moment().tz('Asia/Taipei').subtract(1, 'days').format('YYYY-MM-DD'),
         'i'
       ),
-      uri: project.uri
+      uri: project.uri,
     }).exec()
 
     if (yesterdayProject) {
@@ -177,29 +167,27 @@ function setRankDiffToArrowSign(project, number) {
 
 async function deleteProjectOffline(projectType, uriObjectInArray) {
   let offLineRankProject = await HourRankProject.find({
-    type: setChineseTypeNameByProjectType(projectType)
+    type: setChineseTypeNameByProjectType(projectType),
   }).nor(uriObjectInArray)
   let offLineRankRecord = await HourRankRecord.find({
-    type: setChineseTypeNameByProjectType(projectType)
+    type: setChineseTypeNameByProjectType(projectType),
   }).nor(uriObjectInArray)
-  offLineRankProject.map(project => {
+  offLineRankProject.map((project) => {
     project.remove()
   })
-  offLineRankRecord.map(record => {
+  offLineRankRecord.map((record) => {
     record.remove()
   })
 }
 
 function checkAndRankRecords(uriArray) {
-  uriArray.map(uri => {
+  uriArray.map((uri) => {
     checkAndRankEachProject(uri)
   })
 }
 
 async function checkAndRankEachProject(uri) {
-  const records = await HourRankRecord.find({ uri })
-    .sort({ date: 1 })
-    .exec()
+  const records = await HourRankRecord.find({ uri }).sort({ date: 1 }).exec()
   // console.log(records)
   // console.log(records.length)
   while (records.length > 13) {
@@ -213,9 +201,7 @@ async function checkAndRankEachProject(uri) {
 
 async function rankProject(uri) {
   const project = await HourRankProject.findOne({ uri }).exec()
-  const records = await HourRankRecord.find({ uri })
-    .sort({ date: 1 })
-    .exec()
+  const records = await HourRankRecord.find({ uri }).sort({ date: 1 }).exec()
   console.log(project)
   if (project) {
     console.log('project exist, update data')
@@ -240,7 +226,7 @@ async function rankProject(uri) {
       left: records[records.length - 1].left,
       leftUnit: records[records.length - 1].leftUnit,
       date: records[records.length - 1].date,
-      uri: records[records.length - 1].uri
+      uri: records[records.length - 1].uri,
     })
   }
 }
@@ -262,8 +248,8 @@ function isLastPage(page, projectType) {
     url: `${baseUrl}page=${page}&type=${projectType}`,
     headers: {
       'User-Agent': random_useragent.getRandom(),
-      cookie: crawler.cookie
-    }
+      cookie: crawler.cookie,
+    },
   }
   return new Promise((resolve, reject) => [
     request(options, (err, res, body) => {
@@ -273,7 +259,7 @@ function isLastPage(page, projectType) {
       const $ = cheerio.load(body)
       console.log(`檢查第${page}頁`)
       options.headers['User-Agent'] = random_useragent.getRandom()
-      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function(
+      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function (
         i,
         elem
       ) {
@@ -285,7 +271,7 @@ function isLastPage(page, projectType) {
         }
         resolve(false)
       })
-    })
+    }),
   ])
 }
 
@@ -294,8 +280,8 @@ function crawlRecord(page, projectType) {
     url: `${baseUrl}page=${page}&type=${projectType}`,
     headers: {
       'User-Agent': random_useragent.getRandom(),
-      cookie: crawler.cookie
-    }
+      cookie: crawler.cookie,
+    },
   }
   return new Promise((resolve, reject) => {
     request(options, (err, res, body) => {
@@ -306,7 +292,7 @@ function crawlRecord(page, projectType) {
       options.headers['User-Agent'] = random_useragent.getRandom()
 
       const records = []
-      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function(
+      $('body > div:nth-child(4) > div.flex.gutter3-l > div').each(function (
         i,
         elem
       ) {
@@ -322,20 +308,10 @@ function crawlRecord(page, projectType) {
           category: $(this)
             .find('div > span')
             .text()
-            .substring(
-              0,
-              $(this)
-                .find('div > span')
-                .text()
-                .indexOf('By') - 1
-            )
+            .substring(0, $(this).find('div > span').text().indexOf('By') - 1)
             .replace('\n', ''),
-          image: $(this)
-            .find('div > a > div')
-            .attr('data-bg-src'),
-          name: $(this)
-            .find('div > a > h3')
-            .text(),
+          image: $(this).find('div > a > div').attr('data-bg-src'),
+          name: $(this).find('div > a > h3').text(),
           raise: parseInt(
             $(this)
               .find('div > div.w-100.absolute.bottom-0.mb3.black > div.fr.b')
@@ -354,13 +330,8 @@ function crawlRecord(page, projectType) {
             .replace('\n', '')
             .substr(-2, 2)
             .replace(' ', ''),
-          date: moment()
-            .tz('Asia/Taipei')
-            .format('YYYY-MM-DD HH:mm:ss'),
-          uri: $(this)
-            .find('div > a')
-            .attr('href')
-            .substring(10)
+          date: moment().tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
+          uri: $(this).find('div > a').attr('href').substring(10),
         }
         records.push(record)
       })
