@@ -21,54 +21,64 @@ async function runRanktrackIntervally() {
 
 function login() {
   return new Promise((resolve, reject) => {
-    request('https://www.zeczec.com/users/sign_in', (err, res, body) => {
-      if (err) {
-        console.log(err)
-        reject(false)
-      }
-
-      const $ = cheerio.load(body)
-      crawler.authenticity_token = $(
-        '#new_user > input[type=hidden]:nth-child(2)'
-      ).val()
-      crawler.cookie = res.headers['set-cookie'][1].split(';')[0]
-      console.log(crawler.cookie, crawler.authenticity_token)
-
-      console.log('=================================')
-      request.post(
-        {
-          url: 'https://www.zeczec.com/users/sign_in',
-          form: {
-            'user[email]': process.env.CRAWLER_USER_EMAIL,
-            'user[password]': process.env.CRAWLER_USER_PASSWORD,
-            commit: '登入',
-            utf8: '✓',
-            authenticity_token: crawler.authenticity_token,
-          },
-          headers: {
-            cookie: crawler.cookie,
-          },
+    request(
+      {
+        url: 'https://www.zeczec.com/users/sign_in',
+        headers: {
+          'User-Agent': random_useragent.getRandom(),
         },
-        function (err, res, body) {
-          if (err) {
-            console.log(err)
-            reject(false)
-          }
-
-          console.log('=================================')
-          // status 302 表示登入跳轉成功
-          if (res.headers) {
-            crawler.cookie = res.headers['set-cookie'][1].split(';')[0]
-            request('https://www.zeczec.com/', (err, res, body) => {
-              if (err) {
-                console.log(err)
-              }
-              resolve(true)
-            })
-          }
+      },
+      (err, res, body) => {
+        if (err) {
+          console.log(err)
+          reject(false)
         }
-      )
-    })
+
+        const $ = cheerio.load(body)
+        crawler.authenticity_token = $(
+          '#new_user > input[type=hidden]:nth-child(2)'
+        ).val()
+        console.log(res.headers)
+        crawler.cookie = res.headers['set-cookie'][1].split(';')[0]
+        console.log(crawler.cookie, crawler.authenticity_token)
+
+        console.log('=================================')
+        request.post(
+          {
+            url: 'https://www.zeczec.com/users/sign_in',
+            form: {
+              'user[email]': process.env.CRAWLER_USER_EMAIL,
+              'user[password]': process.env.CRAWLER_USER_PASSWORD,
+              commit: '登入',
+              utf8: '✓',
+              authenticity_token: crawler.authenticity_token,
+            },
+            headers: {
+              'User-Agent': random_useragent.getRandom(),
+              cookie: crawler.cookie,
+            },
+          },
+          function (err, res, body) {
+            if (err) {
+              console.log(err)
+              reject(false)
+            }
+
+            console.log('=================================')
+            // status 302 表示登入跳轉成功
+            if (res.headers) {
+              crawler.cookie = res.headers['set-cookie'][1].split(';')[0]
+              request('https://www.zeczec.com/', (err, res, body) => {
+                if (err) {
+                  console.log(err)
+                }
+                resolve(true)
+              })
+            }
+          }
+        )
+      }
+    )
   })
 }
 
