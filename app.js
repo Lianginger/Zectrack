@@ -46,7 +46,7 @@ setInterval(function() {
 }, 1000 * 60 * 25)
 
 // runZectrack()
-runRanktrack()
+// runRanktrack()
 
 app.listen(port, () => {
   console.log(`Express is running and listen on port ${port}`)

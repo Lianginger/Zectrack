@@ -14,7 +14,7 @@ const random_useragent = require('random-useragent')
 const crawler = {}
 
 async function runRanktrackIntervally() {
-  await login()
+  // await login()
   runRanktrack()
   setInterval(runRanktrack, intervalTime)
 }
@@ -249,6 +249,7 @@ async function getNumberOfPage(projectType) {
       break
     }
     page++
+    await sleep(10000)
   }
   return page
 }
@@ -357,6 +358,10 @@ function setChineseTypeNameByProjectType(projectType) {
   } else if (projectType === 'crowdfunding') {
     return '群眾集資'
   }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 module.exports = runRanktrackIntervally
